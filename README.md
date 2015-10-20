@@ -2,14 +2,16 @@
 
 Golang implementation of a genetic algorithm. See ./examples for info on how to use the library.
 
-## Usage
+## Overview
 Goga is configured by injecting different behaviours into the main genetic algorithm object. The main injectable components are the simulator, selector and mater.
 
 The simulator provides a function that accepts a single genome and assigns a fitness score to it. The higher the fitness, the better the genome has done in the simulation. A genome can be simulated by however the application sees fit as long as it can be encoded into a bitset of 0s and 1s. A simulator also provides a function to tell the algorithm when to stop.
 
 The selector object takes a popualtion of genomes and the total fitness and returns a genome from the population that it has chosen. A common implementation is roulette in which a random value between 0..totalFitness is generated and the genomes are cycled through subtracting their fitness away from this random number. Then this number goes below 0 then a genome has been 'selected'. The idea is that a genome with a higher fitness will be more likely to be chosen.
 
-A mater accepts two genomes and combines them to produce two others. The idea is that a 
+A mater accepts two genomes from the selector and combines them to produce two others. There are some common predefined mating algorithms but the user is also free to define their own.
+
+As genomes that have a fitness are more likely to mate, the program will slowly work its way towards what it thinks is an optimal solution.
 
 ## Examples
 This section will talk through any example programs using this library.
