@@ -39,7 +39,6 @@ func ( s *selector ) Go( genomeArray []IGenome, totalFitness int ) *IGenome {
 			}
 		}
 	}
-	return nil
 }
 
 func Roulette( genomeArray []IGenome, totalFitness int ) *IGenome {
