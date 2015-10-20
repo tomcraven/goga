@@ -62,5 +62,4 @@ func Roulette( genomeArray []IGenome, totalFitness int ) *IGenome {
 	}
 
 	panic( "total fitness is too large" )
-	return &genomeArray[0]
 }
