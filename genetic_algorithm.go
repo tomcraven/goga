@@ -50,7 +50,7 @@ func ( ga *GeneticAlgorithm ) beginSimulation() {
 }
 
 func ( ga *GeneticAlgorithm ) onNewGenomeToSimulate( g *IGenome ) {
-	kMultiThreaded := false
+	kMultiThreaded := true
 
 	if kMultiThreaded {
 		go func( genome *IGenome ) {
