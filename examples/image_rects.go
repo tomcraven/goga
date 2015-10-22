@@ -27,9 +27,9 @@ func createImageFromBitset( bits *ga.Bitset, bitsetFormat ga.IBitsetParse ) imag
 	inputImageBounds := inputImage.Bounds()
 
 	newImage := image.NewRGBA( inputImageBounds )
-	draw.Draw(newImage, newImage.Bounds(), &image.Uniform{ color.RGBA{ 0, 0, 0, 255 } }, image.ZP, draw.Over)	
+	// draw.Draw(newImage, newImage.Bounds(), &image.Uniform{ color.RGBA{ 0, 0, 0, 255 } }, image.ZP, draw.Over)	
 
-	for i := 0; i < kNumBoxes; i++ {
+	for i := 0; i < bits.GetSize() / kBitsPerBox; i++ {
 		boxBitset := bits.Slice( i * kBitsPerBox, kBitsPerBox )
 		parsedBits := bitsetFormat.Process( &boxBitset )
 
@@ -45,12 +45,23 @@ func createImageFromBitset( bits *ga.Bitset, bitsetFormat ga.IBitsetParse ) imag
 			uint8( parsedBits[7] ),
 		}
 
-		draw.DrawMask(newImage, image.Rect(
-			int( ( float64( parsedBits[0] ) / float64( kMaxBoxCornerCoordinate ) ) * float64( inputImageBounds.Max.X ) ),
-			int( ( float64( parsedBits[1] ) / float64( kMaxBoxCornerCoordinate ) ) * float64( inputImageBounds.Max.Y ) ),
-			int( ( float64( parsedBits[2] ) / float64( kMaxBoxCornerCoordinate ) ) * float64( inputImageBounds.Max.X ) ),
-			int( ( float64( parsedBits[3] ) / float64( kMaxBoxCornerCoordinate ) ) * float64( inputImageBounds.Max.Y ) )), 
-			&image.Uniform{ colour }, image.ZP, &image.Uniform{ alpha }, image.ZP, draw.Over)	
+		x1 := int( ( float64( parsedBits[0] ) / float64( kMaxBoxCornerCoordinate ) ) * float64( inputImageBounds.Max.X ) )
+		y1 := int( ( float64( parsedBits[1] ) / float64( kMaxBoxCornerCoordinate ) ) * float64( inputImageBounds.Max.Y ) )
+		x2 := int( ( float64( parsedBits[2] ) / float64( kMaxBoxCornerCoordinate ) ) * float64( inputImageBounds.Max.X ) )
+		y2 := int( ( float64( parsedBits[3] ) / float64( kMaxBoxCornerCoordinate ) ) * float64( inputImageBounds.Max.Y ) )
+
+		// if x1 > x2 {
+		// 	swap( &x1, &x2 )
+		// }
+
+		// if ( y1 > y2 ) {
+		// 	swap( &y1, &y2 )
+		// }
+
+		draw.DrawMask(newImage, image.Rect( x1, y1, x2, y2 ),
+			&image.Uniform{ colour }, image.ZP, 
+			&image.Uniform{ alpha }, image.ZP, 
+			draw.Over)
 	}
 
 	return newImage
@@ -81,24 +92,25 @@ func calculateHue( r, g, b uint32 ) float64 {
 	max := maxFloat64( normalisedR, maxFloat64( normalisedG, normalisedB ) )
 
 	if( ( max - min ) == 0 ) {
-		return 360
+		return 0.0
 	}
 
-	if ( normalisedR > normalisedG && normalisedR > normalisedB ) {
-		return ( normalisedG - normalisedB ) / ( max - min )
-	} else if ( normalisedG > normalisedR && normalisedG > normalisedB ) {
-		return 2.0 + ( normalisedB - normalisedR ) / ( max - min )
+	hue := 0.0
+	if ( ( normalisedR > normalisedG ) && ( normalisedR > normalisedB ) ) {
+		hue = ( normalisedG - normalisedB ) / ( max - min )
+	} else if ( ( normalisedG > normalisedR ) && ( normalisedG > normalisedB ) ) {
+		hue = 2.0 + ( ( normalisedB - normalisedR ) / ( max - min ) )
+	} else {
+		hue = 4.0 + ( ( normalisedR - normalisedG ) / ( max - min ) )
 	}
 
-	hue := ( 4.0 + ( normalisedR - normalisedG ) / ( max - min ) ) * 60
-
+	hue *= 60
 	if ( hue < 0.0 ) {
 		hue += 360
 	}
 
 	return hue
 }
-
 type ImageMatcherSimulator struct {
 	BitsetFormat ga.IBitsetParse
 	totalIterations int
@@ -111,22 +123,22 @@ func ( simulator *ImageMatcherSimulator ) OnEndSimulation() {
 func ( simulator *ImageMatcherSimulator ) Simulate( g *ga.IGenome ) {
 
 	bits := (*g).GetBits()
-
 	newImage := createImageFromBitset( bits, simulator.BitsetFormat )
 
 	inputImageBounds := inputImage.Bounds()
 	fitness := 0.0
 	for y := 0; y < inputImageBounds.Max.Y; y++ {
 		for x := 0; x < inputImageBounds.Max.X; x++ {
-			inputR, inputG, inputB, _ := inputImage.At( x, y ).RGBA()
-			createdR, createdG, createdB, _ := newImage.At( x, y ).RGBA()
+			inputR, inputG, inputB, inputA := inputImage.At( x, y ).RGBA()
+			createdR, createdG, createdB, createdA := newImage.At( x, y ).RGBA()
 
 			inputHue := calculateHue( inputR, inputG, inputB )
 			createdHue := calculateHue( createdR, createdG, createdB )
 
 			hueDifference := math.Abs( inputHue - createdHue )
+			alphaDifference := math.Abs( float64( createdA ) - float64( inputA ) )
 
-			fitness += 360.0 - hueDifference
+			fitness += ( 360.0 - hueDifference ) + ( 0xFFFF - alphaDifference )
 		}
 	}
 
@@ -140,8 +152,8 @@ type MyBitsetCreate struct {
 }
 func ( bc *MyBitsetCreate ) Go() ga.Bitset {
 	b := ga.Bitset{}
-	b.Create( kTotalBitsPerGenome )
-	for i := 0; i < kTotalBitsPerGenome; i++ {
+	b.Create( kNumBoxes * kBitsPerBox )
+	for i := 0; i < b.GetSize(); i++ {
 		b.Set( i, rand.Intn( 2 ) )
 	}
 	return b
@@ -150,6 +162,7 @@ func ( bc *MyBitsetCreate ) Go() ga.Bitset {
 type MyEliteConsumer struct {
 	currentIter int
 	BitsetFormat ga.IBitsetParse
+	previousFitness int
 }
 func ( ec *MyEliteConsumer ) OnElite( g *ga.IGenome ) {
 	bits := (*g).GetBits()
@@ -160,17 +173,20 @@ func ( ec *MyEliteConsumer ) OnElite( g *ga.IGenome ) {
     png.Encode( outputImageFile, newImage )
 
 	ec.currentIter++
-	fmt.Println( ec.currentIter, "\t", (*g).GetFitness() )
+	fitness := (*g).GetFitness()
+	fmt.Println( ec.currentIter, "\t", fitness, "\t", fitness - ec.previousFitness )
+
+	ec.previousFitness = fitness
 }
 
 const (
 	// Fiddle with these
-	kNumBoxes = 30
-	kPopulationSize = 50
+	kNumBoxes = 4
+	kPopulationSize = 10
 	kMaxIterations = 99999999
 
 	// Don't fiddle with these...
-	kBitsPerCorner = 12 // 0 - 4095
+	kBitsPerCorner = 3
 	kMaxBoxCornerCoordinate = ( 1 << kBitsPerCorner ) - 1
 	kBitsPerColourChannel = 8	// 0 - 255
 	kBitsPerBox = ( kBitsPerCorner * 4 ) + ( kBitsPerColourChannel * 4 )
@@ -190,7 +206,7 @@ func getImageFromFile( filename string ) image.Image {
 
 func main() {
 
-	runtime.GOMAXPROCS( 6 )
+	runtime.GOMAXPROCS( 4 )
 
 	// Get the input image
 	inputImage = getImageFromFile( os.Args[ 1 ] )
@@ -212,12 +228,12 @@ func main() {
 	genAlgo.EliteConsumer = &eliteConsumer
 	genAlgo.Mater = ga.NewMater( 
 		[]ga.MaterFunctionProbability{
-			{ P : 1.0, F : ga.TwoPointCrossover },
-			{ P : 0.3, F : ga.TwoPointCrossover, UseElite : true },
-			{ P : 0.3, F : ga.Mutate },
-			{ P : 0.3, F : ga.Mutate },
-			{ P : 0.3, F : ga.Mutate },
-			{ P : 0.3, F : ga.Mutate },
+			{ P : 1.0, F : ga.UniformCrossover, UseElite : true },
+			{ P : 1.0, F : ga.Mutate },
+			{ P : 1.0, F : ga.Mutate },
+			{ P : 1.0, F : ga.Mutate },
+			{ P : 1.0, F : ga.Mutate },
+			{ P : 1.0, F : ga.Mutate },
 		},
 	)
 	genAlgo.Selector = ga.NewSelector(
