@@ -73,7 +73,8 @@ const (
 
 func main() {
 
-	runtime.GOMAXPROCS( 1 )
+	numThreads := 4
+	runtime.GOMAXPROCS( numThreads )
 	
 	genAlgo := ga.NewGeneticAlgorithm()
 
@@ -93,7 +94,7 @@ func main() {
 		},
 	)
 
-	genAlgo.Init( kPopulationSize )
+	genAlgo.Init( kPopulationSize, numThreads )
 
 	startTime := time.Now()
 	genAlgo.Simulate()

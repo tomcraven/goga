@@ -11,6 +11,8 @@ import (
 	"time"
 	)
 
+const kNumThreads = 1
+
 type GeneticAlgorithmSuite struct {
 }
 var _ = Suite( &GeneticAlgorithmSuite{} )
@@ -35,7 +37,7 @@ func ( s *GeneticAlgorithmSuite ) TestShouldSimulateUntil( t *C ) {
 	}
 
 	genAlgo := ga.NewGeneticAlgorithm()
-	genAlgo.Init( 1 )
+	genAlgo.Init( 1, kNumThreads )
 	ret := genAlgo.SimulateUntil( exitFunc )
 	t.Assert( ret, IsTrue )
 	t.Assert( callCount, Equals, 1 )
@@ -75,7 +77,7 @@ func ( s *GeneticAlgorithmSuite ) TestShouldCallMaterAppropriately_1( t *C ) {
 	)
 
 	genAlgo := ga.NewGeneticAlgorithm()
-	genAlgo.Init( 2 )
+	genAlgo.Init( 2, kNumThreads )
 	genAlgo.Mater = m
 
 	numIterations := 1000
@@ -109,7 +111,7 @@ func ( s *GeneticAlgorithmSuite ) TestShouldCallMaterAppropriately_2( t *C ) {
 
 	genAlgo := ga.NewGeneticAlgorithm()
 	populationSize := 100
-	genAlgo.Init( populationSize )
+	genAlgo.Init( populationSize, kNumThreads )
 	genAlgo.Mater = m
 
 	numIterations := 1000
@@ -136,7 +138,7 @@ func ( s *GeneticAlgorithmSuite ) TestShouldCallMaterAppropriately_OddSizedPopul
 
 	genAlgo := ga.NewGeneticAlgorithm()
 	populationSize := 99
-	genAlgo.Init( populationSize )
+	genAlgo.Init( populationSize, kNumThreads )
 	genAlgo.Mater = m
 
 	numIterations := 1000
@@ -157,7 +159,7 @@ func ( s *GeneticAlgorithmSuite ) TestShouldCallIntoEliteConsumer( t *C ) {
 
 	ec := MyEliteConsumerCounter{}
 	genAlgo := ga.NewGeneticAlgorithm()
-	genAlgo.Init( 1 )
+	genAlgo.Init( 1, kNumThreads )
 	genAlgo.EliteConsumer = &ec
 
 	numIterations := 42
@@ -180,12 +182,12 @@ func ( s *GeneticAlgorithmSuite ) TestShouldNotSimulateWithNoPopulation( t *C ) 
 	t.Assert( ret, IsFalse )
 	t.Assert( callCount, Equals, 0 )
 
-	genAlgo.Init( 0 )
+	genAlgo.Init( 0, kNumThreads )
 	ret = genAlgo.SimulateUntil( exitFunc )
 	t.Assert( ret, IsFalse )
 	t.Assert( callCount, Equals, 0 )
 
-	genAlgo.Init( 1 )
+	genAlgo.Init( 1, kNumThreads )
 	ret = genAlgo.SimulateUntil( exitFunc )
 	t.Assert( ret, IsTrue )
 	t.Assert( callCount, Equals, 1 )
@@ -197,14 +199,14 @@ func ( s *GeneticAlgorithmSuite ) TestShouldGetPopulation( t *C ) {
 
 	t.Assert( genAlgo.GetPopulation(), HasLen, 0 )
 
-	genAlgo.Init( 1 )
+	genAlgo.Init( 1, kNumThreads )
 	pop := genAlgo.GetPopulation()
 	t.Assert( pop, HasLen, 1 )
 
 	g := ga.NewGenome( ga.Bitset{} )
 	t.Assert( pop[0], FitsTypeOf, g )
 
-	genAlgo.Init( 123 )
+	genAlgo.Init( 123, kNumThreads )
 	t.Assert( genAlgo.GetPopulation(), HasLen, 123 )
 
 	p1 := genAlgo.GetPopulation()
@@ -240,7 +242,7 @@ func ( s *GeneticAlgorithmSuite ) TestShouldSimulatePopulatonCounter( t *C ) {
 	t.Assert( ms.NumCalls, Equals, 0 )
 
 	populationSize := 100
-	genAlgo.Init( populationSize );
+	genAlgo.Init( populationSize, kNumThreads );
 
 	numIterations := 10
 	genAlgo.SimulateUntil( helperGenerateExitFunction( numIterations ) )
@@ -290,7 +292,7 @@ func ( s *GeneticAlgorithmSuite ) TestShouldSimulatePopulationAndPassEliteToCons
 	ec := MyEliteConsumerFitness{}
 	genAlgo.EliteConsumer = &ec
 
-	genAlgo.Init( 100 );
+	genAlgo.Init( 100, kNumThreads );
 
 	genAlgo.SimulateUntil( helperGenerateExitFunction( numIterations ) )
 
@@ -330,7 +332,7 @@ func ( s *GeneticAlgorithmSuite ) TestShouldCallOnBeginEndSimulation( t *C ) {
 	t.Assert( ms.SimulateCalled, Equals, false )
 	t.Assert( ms.Order, HasLen, 0 )
 
-	genAlgo.Init( 1 );
+	genAlgo.Init( 1, kNumThreads );
 	genAlgo.SimulateUntil( helperGenerateExitFunction( 1 ) )
 
 	// Sleep and give time for threads to start up
@@ -353,7 +355,7 @@ func ( s* GeneticAlgorithmSuite ) TestShouldPassEliteToExitFunc( t *C ) {
 	genAlgo.EliteConsumer = &ec
 
 	populationSize := 10
-	genAlgo.Init( populationSize );
+	genAlgo.Init( populationSize, kNumThreads );
 
 	passedGenomeFitnesses := make([]int, populationSize )
 	callCount := 0
@@ -403,7 +405,7 @@ func ( s* GeneticAlgorithmSuite ) TestShouldNotCallMaterWithGenomesFromPopulatio
 		},
 	)
 
-	genAlgo.Init( 10 )
+	genAlgo.Init( 10, kNumThreads )
 	genAlgo.Mater = m
 
 	numIterations := 1000
@@ -427,7 +429,7 @@ func ( s* GeneticAlgorithmSuite ) TestShouldCallSelectorAppropriately( t *C ) {
 	genAlgo.Selector = &selector
 
 	populationSize := 100
-	genAlgo.Init( populationSize )
+	genAlgo.Init( populationSize, kNumThreads )
 	t.Assert( selector.CallCount, Equals, 0 )
 
 	numIterations := 100
@@ -468,7 +470,7 @@ func ( s* GeneticAlgorithmSuite ) TestShouldPassSelectedGenomesToMater( t *C ) {
 	genAlgo.Mater = &mater
 	genAlgo.Simulator = &MySimulatorFitness{}
 
-	genAlgo.Init( 100 )
+	genAlgo.Init( 100, kNumThreads )
 	genAlgo.SimulateUntil( helperGenerateExitFunction( 100 ) )
 
 	t.Assert( len( mater.PassedGenomes ), Equals, len( selector.PassedGenomes ) )
@@ -492,7 +494,7 @@ func ( s* GeneticAlgorithmSuite ) TestShouldCallIntoBitsetCreate( t *C ) {
 	genAlgo.BitsetCreate = &bitsetCreate
 
 	numGenomes := 100
-	genAlgo.Init( numGenomes )
+	genAlgo.Init( numGenomes, kNumThreads )
 
 	t.Assert( bitsetCreate.NumCalls, Equals, numGenomes )
 }
@@ -526,7 +528,7 @@ func ( s* GeneticAlgorithmSuite ) TestShouldReplaceOldPopulationWithMatedOne( t 
 	genAlgo := ga.NewGeneticAlgorithm()
 	genAlgo.Mater = &mater
 	populationSize := 10
-	genAlgo.Init( populationSize )
+	genAlgo.Init( populationSize, kNumThreads )
 	genAlgo.SimulateUntil( helperGenerateExitFunction( 2 ) )
 
 	genAlgoPopulation := genAlgo.GetPopulation()

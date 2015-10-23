@@ -4,6 +4,7 @@ package ga
 import (
 	// "fmt"
 	"time"
+	"sync"
 )
 
 type GeneticAlgorithm struct {	
@@ -18,6 +19,8 @@ type GeneticAlgorithm struct {
 	totalFitness int
 	genomeSimulationChannel chan *IGenome
 	exitFunc func( *IGenome ) bool
+	waitGroup *sync.WaitGroup
+	parallelSimulations int
 }
 
 func NewGeneticAlgorithm() GeneticAlgorithm {
@@ -38,36 +41,42 @@ func ( ga *GeneticAlgorithm ) createPopulation() []IGenome {
 	return ret
 }
 
-func ( ga *GeneticAlgorithm ) Init( populationSize int ) {
+func ( ga *GeneticAlgorithm ) Init( populationSize, parallelSimulations int ) {
 	ga.populationSize = populationSize
-	ga.genomeSimulationChannel = make( chan *IGenome, populationSize )
 	ga.population = ga.createPopulation()
+	ga.parallelSimulations = parallelSimulations
+
+	ga.waitGroup = new( sync.WaitGroup )
+	
 }
 
 func ( ga *GeneticAlgorithm ) beginSimulation() {
 	ga.Simulator.OnBeginSimulation()
 	ga.totalFitness = 0
+
+	ga.genomeSimulationChannel = make( chan *IGenome )
+
+	// todo: make configurable
+	for i := 0; i < ga.parallelSimulations; i++ {
+		go func ( genomeSimulationChannel chan *IGenome, 
+			waitGroup *sync.WaitGroup, simulator ISimulator ) {
+
+			for genome := range genomeSimulationChannel {
+				defer waitGroup.Done()
+				simulator.Simulate( genome )
+			}
+		}( ga.genomeSimulationChannel, ga.waitGroup, ga.Simulator )
+	}
 }
 
 func ( ga *GeneticAlgorithm ) onNewGenomeToSimulate( g *IGenome ) {
-	kMultiThreaded := true
-
-	if kMultiThreaded {
-		go func( genome *IGenome ) {
-			ga.Simulator.Simulate( genome )
-			ga.genomeSimulationChannel <- genome
-		}( g )
-	} else {
-		ga.Simulator.Simulate( g )
-		ga.genomeSimulationChannel <- g
-	}
+	ga.waitGroup.Add( 1 )
+	ga.genomeSimulationChannel <- g
 }
 
 func ( ga *GeneticAlgorithm ) syncSimulatingGenomes() {
-	for i := 0; i < ga.populationSize; i++ {
-		g := <- ga.genomeSimulationChannel
-		ga.totalFitness += (*g).GetFitness()
-	}
+	close( ga.genomeSimulationChannel )
+	ga.waitGroup.Wait()
 }
 
 func ( ga *GeneticAlgorithm ) getElite() *IGenome {
