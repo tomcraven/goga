@@ -85,3 +85,17 @@ func (s *BitsetSuite ) TestShouldSlice( t *C ) {
 		t.Assert( slice.Get( i ), Equals, 1 )
 	}
 }
+
+func (s *BitsetSuite ) TestShouldGetAll( t *C ) {
+
+	const kBitsetSize = 10
+	s.bitset.Create( kBitsetSize )
+	s.bitset.SetAll( 1 )
+
+	bits := s.bitset.GetAll()
+	t.Assert( len( bits ), Equals, kBitsetSize )
+
+	for i := 0; i < kBitsetSize; i++ {
+		t.Assert( bits[ i ], Equals, 1 )
+	}
+}

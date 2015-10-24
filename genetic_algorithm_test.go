@@ -11,7 +11,7 @@ import (
 	"time"
 	)
 
-const kNumThreads = 1
+const kNumThreads = 4
 
 type GeneticAlgorithmSuite struct {
 }
@@ -541,14 +541,40 @@ func ( s* GeneticAlgorithmSuite ) TestShouldReplaceOldPopulationWithMatedOne( t 
 	}
 }
 
-type MyBitsetCreateRandom struct {
-	GenomeSize int
+type MySimulatorCallTracker struct {
+	NumBeginSimulationsUntilExit int
+
+	NumBeginSimulationCalls int
+	NumSimulateCalls int
+	m sync.Mutex
 }
-func ( bc *MyBitsetCreateRandom ) Go() ga.Bitset {
-	b := ga.Bitset{}
-	b.Create( bc.GenomeSize )
-	for i := 0; i < bc.GenomeSize; i++ {
-		b.Set( i, rand.Intn( 2 ) )
-	}
-	return b
+func ( ms *MySimulatorCallTracker ) Simulate( *ga.IGenome ) {
+	ms.m.Lock()
+	ms.NumSimulateCalls++
+	ms.m.Unlock()
+}
+func ( ms *MySimulatorCallTracker ) OnBeginSimulation() {
+	ms.NumBeginSimulationCalls++
+}
+func ( ms *MySimulatorCallTracker ) OnEndSimulation() {
+}
+func ( ms *MySimulatorCallTracker ) ExitFunc( *ga.IGenome ) bool {
+	return ( ms.NumBeginSimulationCalls >= ms.NumBeginSimulationsUntilExit )
+}
+
+func ( s *GeneticAlgorithmSuite ) TestShouldSimulateUsingSimulatorExitFunction( t *C ) {
+	genAlgo := ga.NewGeneticAlgorithm()
+
+	ms := MySimulatorCallTracker{}
+	ms.NumBeginSimulationsUntilExit = 5
+	genAlgo.Simulator = &ms
+	t.Assert( ms.NumBeginSimulationCalls, Equals, 0 )
+	t.Assert( ms.NumSimulateCalls, Equals, 0 )
+
+	populationSize := 100
+	genAlgo.Init( populationSize, kNumThreads );
+	genAlgo.Simulate()
+
+	t.Assert( ms.NumSimulateCalls, Equals, ms.NumBeginSimulationsUntilExit * populationSize )
+	t.Assert( ms.NumBeginSimulationCalls, Equals, ms.NumBeginSimulationsUntilExit )
 }
