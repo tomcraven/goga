@@ -85,6 +85,7 @@ kMaxCircleRadiusFactor = 3
 The script outputs the 'best' genome from each iteration to "elite.png" as well as the original overlayed in "elite_with_original.png".
 
 Here's an example of what can be generated. Input, output and both overlayed over the top of each other:
+
 ![input](https://cloud.githubusercontent.com/assets/5236109/10744734/01031bda-7c34-11e5-94ab-795afba114c1.gif)
 ![output](https://cloud.githubusercontent.com/assets/5236109/10744673/97a7aea8-7c33-11e5-8cfe-ea66489d8d9c.png)
 ![overlayed](https://cloud.githubusercontent.com/assets/5236109/10744674/9ad23fa8-7c33-11e5-88d9-aff565cca6c4.png)
