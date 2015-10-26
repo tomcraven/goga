@@ -67,10 +67,11 @@ func ( ga *GeneticAlgorithm ) beginSimulation() {
 			}
 		}( ga.genomeSimulationChannel, ga.waitGroup, ga.Simulator )
 	}
+
+	ga.waitGroup.Add( ga.populationSize )
 }
 
 func ( ga *GeneticAlgorithm ) onNewGenomeToSimulate( g *IGenome ) {
-	ga.waitGroup.Add( 1 )
 	ga.genomeSimulationChannel <- g
 }
 
