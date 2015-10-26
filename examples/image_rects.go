@@ -16,6 +16,23 @@ import (
 	"runtime"
 )
 
+const (
+	// Fiddle with these
+	kNumShapes = 100
+	kPopulationSize = 100
+	kMaxIterations = 9999999
+	kBitsPerCoordinateNumber = 9
+	kParallelSimulations = 24
+	kMaxCircleRadiusFactor = 3 // larger == smaller max circle size relative to image dimensions
+
+	// Don't fiddle with these...
+	kMaxBoxCornerCoordinateNumber = ( 1 << kBitsPerCoordinateNumber ) - 1
+	kBitsPerColourChannel = 8	// 0 - 255
+	kBitsPerRect = ( kBitsPerCoordinateNumber * 4 ) + ( kBitsPerColourChannel * 4 )
+	kBitsPerCircle = ( kBitsPerCoordinateNumber * 3 ) + ( kBitsPerColourChannel * 4 )
+	kBitsToDescribeWhichShape = 1
+)
+
 // http://blog.golang.org/go-imagedraw-package
 type circle struct {
     p image.Point
@@ -39,7 +56,7 @@ func (c *circle) At(x, y int) color.Color {
     return color.Alpha{0}
 }
 
-func createImageFromBitset( bits *ga.Bitset ) image.Image {
+func createImageFromBitset( bits *ga.Bitset ) draw.Image {
 	inputImageBounds := inputImage.Bounds()
 
 	newImage := image.NewRGBA( inputImageBounds )
@@ -86,10 +103,24 @@ func createImageFromBitset( bits *ga.Bitset ) image.Image {
 				255,
 			}
 
-			x := int( ( float64( parsedBits[0] ) / float64( kMaxBoxCornerCoordinateNumber ) ) * float64( inputImageBounds.Max.X ) )
-			y := int( ( float64( parsedBits[1] ) / float64( kMaxBoxCornerCoordinateNumber ) ) * float64( inputImageBounds.Max.Y ) )
-			r := int( ( float64( parsedBits[2] ) / float64( kMaxBoxCornerCoordinateNumber ) ) * 
-				math.Max( float64( inputImageBounds.Max.X ), float64( inputImageBounds.Max.Y ) )  / 2 )
+			normalisedX := float64( parsedBits[0] ) / float64( kMaxBoxCornerCoordinateNumber )
+			normalisedY := float64( parsedBits[1] ) / float64( kMaxBoxCornerCoordinateNumber )
+
+			xMin := float64( -inputImageBounds.Max.X )
+			yMin := float64( -inputImageBounds.Max.Y )
+
+			xMax := float64( inputImageBounds.Max.X + inputImageBounds.Max.X )
+			yMax := float64( inputImageBounds.Max.Y + inputImageBounds.Max.Y )
+
+			xRange := xMax - xMin
+			yRange := yMax - yMin
+
+			x := int( xMin + ( normalisedX * xRange ) )
+			y := int( yMin + ( normalisedY * yRange ) )
+
+			normalisedR := float64( parsedBits[2] ) / float64( kMaxBoxCornerCoordinateNumber )
+			maxR := math.Max( float64( inputImageBounds.Max.X ), float64( inputImageBounds.Max.Y ) )
+			r := int( normalisedR * maxR ) / kMaxCircleRadiusFactor
 
 			c := circle{ image.Point{ x, y }, r, uint8( parsedBits[6] )}
 
@@ -208,15 +239,6 @@ func ( simulator *ImageMatcherSimulator ) Simulate( g *ga.IGenome ) {
 
 			colourDifference := calculateColourDifference( inputR, inputG, inputB, createdR, createdG, createdB )
 
-			if( colourDifference > 500.0 ) {
-				fmt.Println( colourDifference, float64(inputR) / 0xFFFF * 255, 
-					float64(inputG) / 0xFFFF * 255, 
-					float64(inputB) / 0xFFFF * 255, 
-					float64(createdR) / 0xFFFF * 255, 
-					float64(createdG) / 0xFFFF * 255, 
-					float64(createdB) / 0xFFFF * 255 )
-			}
-
 			fitness += ( 500.0 - colourDifference )
 		}
 	}
@@ -246,9 +268,19 @@ func ( ec *MyEliteConsumer ) OnElite( g *ga.IGenome ) {
 	bits := (*g).GetBits()
 	newImage := createImageFromBitset( bits )
 
+	// Output elite
 	outputImageFile, _ := os.Create( "elite.png" )
     png.Encode( outputImageFile, newImage )
     outputImageFile.Close()
+
+    // Output elite with input image blended over the top
+	outputImageFileAlphaBlended, _ := os.Create( "elite_with_original.png" )
+	draw.DrawMask(newImage, newImage.Bounds(),
+				inputImage, image.ZP, 
+				&image.Uniform{ color.RGBA{ 0, 0, 0, 255 / 4 } }, image.ZP, 
+				draw.Over)
+    png.Encode( outputImageFileAlphaBlended, newImage )
+    outputImageFileAlphaBlended.Close()
 
 	ec.currentIter++
 	fitness := (*g).GetFitness()
@@ -256,23 +288,8 @@ func ( ec *MyEliteConsumer ) OnElite( g *ga.IGenome ) {
 
 	ec.previousFitness = fitness
 
-	time.Sleep( 100 * time.Millisecond )
+	time.Sleep( 10 * time.Millisecond )
 }
-
-const (
-	// Fiddle with these
-	kNumShapes = 100
-	kPopulationSize = 50
-	kMaxIterations = 9999999
-	kBitsPerCoordinateNumber = 5
-
-	// Don't fiddle with these...
-	kMaxBoxCornerCoordinateNumber = ( 1 << kBitsPerCoordinateNumber ) - 1
-	kBitsPerColourChannel = 8	// 0 - 255
-	kBitsPerRect = ( kBitsPerCoordinateNumber * 4 ) + ( kBitsPerColourChannel * 4 )
-	kBitsPerCircle = ( kBitsPerCoordinateNumber * 3 ) + ( kBitsPerColourChannel * 4 )
-	kBitsToDescribeWhichShape = 1
-)
 
 var (
 	kLargestShapeBits int
@@ -304,7 +321,7 @@ func getImageFromFile( filename string ) image.Image {
 
 func main() {
 
-	runtime.GOMAXPROCS( 10 )
+	runtime.GOMAXPROCS( runtime.NumCPU() )
 
 	// Get the input image
 	inputImage = getImageFromFile( os.Args[ 1 ] )
@@ -348,7 +365,7 @@ func main() {
 		},
 	)
 
-	genAlgo.Init( kPopulationSize )
+	genAlgo.Init( kPopulationSize, kParallelSimulations )
 
 	startTime := time.Now()
 	genAlgo.Simulate()
