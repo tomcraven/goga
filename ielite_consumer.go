@@ -1,12 +1,11 @@
-
 package ga
 
 type IEliteConsumer interface {
-	OnElite( *IGenome )
+	OnElite(*IGenome)
 }
 
 type NullEliteConsumer struct {
 }
 
-func ( nec *NullEliteConsumer ) OnElite( *IGenome ) {
+func (nec *NullEliteConsumer) OnElite(*IGenome) {
 }

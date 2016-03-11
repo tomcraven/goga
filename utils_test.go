@@ -26,7 +26,7 @@ func (checker *isTrueChecker) Check(params []interface{}, names []string) (resul
 }
 
 func isTrue(obtained interface{}) (result bool) {
-	return ( obtained == true )
+	return (obtained == true)
 }
 
 // -----------------------------------------------------------------------
@@ -51,5 +51,5 @@ func (checker *isFalseChecker) Check(params []interface{}, names []string) (resu
 }
 
 func isFalse(obtained interface{}) (result bool) {
-	return ( obtained == false )
+	return (obtained == false)
 }

@@ -1,4 +1,3 @@
-
 package ga
 
 type IBitsetCreate interface {
@@ -8,6 +7,6 @@ type IBitsetCreate interface {
 type NullBitsetCreate struct {
 }
 
-func ( ngc *NullBitsetCreate ) Go() Bitset {
+func (ngc *NullBitsetCreate) Go() Bitset {
 	return Bitset{}
 }
