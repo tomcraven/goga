@@ -7,6 +7,7 @@ import (
 	"math/rand"
 	"time"
 	"runtime"
+	"os"
 )
 
 type StringMaterSimulator struct {
@@ -15,9 +16,9 @@ func ( sms *StringMaterSimulator ) OnBeginSimulation() {
 }
 func ( sms *StringMaterSimulator ) OnEndSimulation() {
 }
-func ( sms *StringMaterSimulator ) Simulate( g *ga.IGenome ) {	
+func ( sms *StringMaterSimulator ) Simulate( g *ga.IGenome ) {
 	bits := (*g).GetBits()
-	for i, character := range kTargetString {
+	for i, character := range targetString {
 		for j := 0; j < 8; j++ {
 			targetBit := character & (1 << uint(j))
 			bit := bits.Get(( i * 8 ) + j)
@@ -30,15 +31,15 @@ func ( sms *StringMaterSimulator ) Simulate( g *ga.IGenome ) {
 	}
 }
 func ( sms *StringMaterSimulator ) ExitFunc( g *ga.IGenome ) bool {
-	return (*g).GetFitness() == kTargetLength
+	return (*g).GetFitness() == targetLength
 }
 
 type MyBitsetCreate struct {
 }
 func ( bc *MyBitsetCreate ) Go() ga.Bitset {
 	b := ga.Bitset{}
-	b.Create( kTargetLength )
-	for i := 0; i < kTargetLength; i++ {
+	b.Create( targetLength )
+	for i := 0; i < targetLength; i++ {
 		b.Set( i, rand.Intn( 2 ) )
 	}
 	return b
@@ -66,22 +67,32 @@ func ( ec *MyEliteConsumer ) OnElite( g *ga.IGenome ) {
 }
 
 const (
-	kTargetString = "abcdefghijklmnopqrstuvwxyz"
-	kTargetLength = len( kTargetString ) * 8
 	kPopulationSize = 600
 )
+
+var (
+	targetString = "abcdefghijklmnopqrstuvwxyz"
+	targetLength int
+)
+
+func init() {
+	if len( os.Args ) > 1 {
+		targetString = os.Args[1]
+	}
+	targetLength = len( targetString ) * 8
+}
 
 func main() {
 
 	numThreads := 4
 	runtime.GOMAXPROCS( numThreads )
-	
+
 	genAlgo := ga.NewGeneticAlgorithm()
 
 	genAlgo.Simulator = &StringMaterSimulator{}
 	genAlgo.BitsetCreate = &MyBitsetCreate{}
 	genAlgo.EliteConsumer = &MyEliteConsumer{}
-	genAlgo.Mater = ga.NewMater( 
+	genAlgo.Mater = ga.NewMater(
 		[]ga.MaterFunctionProbability{
 			{ P : 1.0, F : ga.TwoPointCrossover },
 			{ P : 1.0, F : ga.Mutate },
