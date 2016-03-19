@@ -1,27 +1,33 @@
 package ga
 
 import (
-	// "math"
 	"math/rand"
-	// "time"
-	// "fmt"
-	// "reflect"
 )
 
+// IMater - an interface to a mater object
 type IMater interface {
 	Go(*IGenome, *IGenome) (IGenome, IGenome)
 	OnElite(*IGenome)
 }
 
+// NullMater - null implementation of the IMater interface
 type NullMater struct {
 }
 
+// Go - null implementation of the IMater go func
 func (nm *NullMater) Go(a, b *IGenome) (IGenome, IGenome) {
 	return NewGenome(*(*a).GetBits()), NewGenome(*(*b).GetBits())
 }
+
+// OnElite - null implementation of the IMater OnElite func
 func (nm *NullMater) OnElite(a *IGenome) {
 }
 
+// MaterFunctionProbability -
+// An implementation of IMater that has a function and a probability
+// where mater function 'F' is called with a probability of 'P'
+// where 'P' is a value between 0 and 1
+// 0 = never called, 1 = called for every genome
 type MaterFunctionProbability struct {
 	P        float32
 	F        func(*IGenome, *IGenome) (IGenome, IGenome)
@@ -33,12 +39,15 @@ type mater struct {
 	elite       *IGenome
 }
 
+// NewMater returns an instance of an IMater with several MaterFuncProbabilities
 func NewMater(materConfig []MaterFunctionProbability) IMater {
 	return &mater{
 		materConfig: materConfig,
 	}
 }
 
+// Go cycles through, and applies, the configures mater functions in the
+// MaterFunctionProbability array
 func (m *mater) Go(g1, g2 *IGenome) (IGenome, IGenome) {
 
 	newG1 := NewGenome(*(*g1).GetBits())
@@ -56,6 +65,7 @@ func (m *mater) Go(g1, g2 *IGenome) (IGenome, IGenome) {
 	return newG1, newG2
 }
 
+// OnElite -
 func (m *mater) OnElite(elite *IGenome) {
 	m.elite = elite
 }
@@ -74,6 +84,13 @@ func min(a, b int) int {
 	return b
 }
 
+// OnePointCrossover -
+// Accepts 2 genomes and combines them to create 2 new genomes using one point crossover
+// i.e.
+// input genomes of:
+// 000000 and 111111
+// could produce output genomes of:
+// 000111 and 111000
 func OnePointCrossover(g1, g2 *IGenome) (IGenome, IGenome) {
 
 	g1Bits, g2Bits := (*g1).GetBits(), (*g2).GetBits()
@@ -111,6 +128,13 @@ func OnePointCrossover(g1, g2 *IGenome) (IGenome, IGenome) {
 	return NewGenome(b1), NewGenome(b2)
 }
 
+// TwoPointCrossover -
+// Accepts 2 genomes and combines them to create 2 new genomes using two point crossover
+// i.e.
+// input genomes of:
+// 000000 and 111111
+// could produce output genomes of:
+// 001100 and 110011
 func TwoPointCrossover(g1, g2 *IGenome) (IGenome, IGenome) {
 
 	g1Bits, g2Bits := (*g1).GetBits(), (*g2).GetBits()
@@ -162,6 +186,13 @@ func TwoPointCrossover(g1, g2 *IGenome) (IGenome, IGenome) {
 	return NewGenome(b1), NewGenome(b2)
 }
 
+// UniformCrossover -
+// Accepts 2 genomes and combines them to create 2 new genomes using uniform crossover
+// i.e.
+// input genomes of:
+// 000000 and 111111
+// could produce output genomes of:
+// 101010 and 010101
 func UniformCrossover(g1, g2 *IGenome) (IGenome, IGenome) {
 
 	g1Bits, g2Bits := (*g1).GetBits(), (*g2).GetBits()
@@ -198,6 +229,14 @@ func UniformCrossover(g1, g2 *IGenome) (IGenome, IGenome) {
 	return NewGenome(b1), NewGenome(b2)
 }
 
+// Mutate -
+// Accepts 2 genomes and mutates a single bit in the first to create a new
+// very slightly different genome
+// i.e.
+// input genomes of:
+// 000000 and 111111
+// could produce output genomes of:
+// 001000 and 111111
 func Mutate(g1, g2 *IGenome) (IGenome, IGenome) {
 
 	g1BitsOrig := (*g1).GetBits()

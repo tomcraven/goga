@@ -1,11 +1,16 @@
 package ga
 
 import (
-	// "fmt"
 	"sync"
 	"time"
 )
 
+// GeneticAlgorithm -
+// The main component of goga, holds onto the state of the algorithm -
+// * Mater - combining evolved genomes
+// * EliteConsumer - an optional class that accepts the 'elite' of each population generation
+// * Simulator - a simulation component used to score each genome in each generation
+// * BitsetCreate - used to create the initial population of genomes
 type GeneticAlgorithm struct {
 	Mater         IMater
 	EliteConsumer IEliteConsumer
@@ -22,6 +27,8 @@ type GeneticAlgorithm struct {
 	parallelSimulations     int
 }
 
+// NewGeneticAlgorithm returns a new GeneticAlgorithm structure with null implementations of
+// EliteConsumer, Mater, Simulator, Selector and BitsetCreate
 func NewGeneticAlgorithm() GeneticAlgorithm {
 	return GeneticAlgorithm{
 		EliteConsumer: &NullEliteConsumer{},
@@ -40,6 +47,8 @@ func (ga *GeneticAlgorithm) createPopulation() []IGenome {
 	return ret
 }
 
+// Init initialises internal components, sets up the population size
+// and number of parallel simulations
 func (ga *GeneticAlgorithm) Init(populationSize, parallelSimulations int) {
 	ga.populationSize = populationSize
 	ga.population = ga.createPopulation()
@@ -80,7 +89,7 @@ func (ga *GeneticAlgorithm) syncSimulatingGenomes() {
 }
 
 func (ga *GeneticAlgorithm) getElite() *IGenome {
-	var ret *IGenome = nil
+	var ret *IGenome
 	for i := 0; i < ga.populationSize; i++ {
 		if ret == nil || ga.population[i].GetFitness() > (*ret).GetFitness() {
 			ret = &ga.population[i]
@@ -89,6 +98,9 @@ func (ga *GeneticAlgorithm) getElite() *IGenome {
 	return ret
 }
 
+// SimulateUntil simulates a population until 'exitFunc' returns true
+// The 'exitFunc' is passed the elite of each population and should return true
+// if the elite reaches a certain criteria (e.g. fitness above a certain threshold)
 func (ga *GeneticAlgorithm) SimulateUntil(exitFunc func(*IGenome) bool) bool {
 	ga.exitFunc = exitFunc
 	return ga.Simulate()
@@ -101,6 +113,7 @@ func (ga *GeneticAlgorithm) shouldExit(elite *IGenome) bool {
 	return ga.exitFunc(elite)
 }
 
+// Simulate runs the genetic algorithm
 func (ga *GeneticAlgorithm) Simulate() bool {
 
 	if ga.populationSize == 0 {
@@ -149,6 +162,7 @@ func (ga *GeneticAlgorithm) Simulate() bool {
 	return true
 }
 
+// GetPopulation returns the population
 func (ga *GeneticAlgorithm) GetPopulation() []IGenome {
 	return ga.population
 }

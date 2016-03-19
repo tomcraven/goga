@@ -2,20 +2,27 @@ package ga
 
 import (
 	"math/rand"
-	// "fmt"
 )
 
+// ISelector - a selector interface used to pick 2 genomes to mate
 type ISelector interface {
 	Go([]IGenome, int) *IGenome
 }
 
+// NullSelector - a null implementation of the Selector interface
 type NullSelector struct {
 }
 
+// Go - a null implementation of Selector's 'go'
 func (ns *NullSelector) Go(genomes []IGenome, totalFitness int) *IGenome {
 	return &genomes[0]
 }
 
+// SelectorFunctionProbability -
+// Contains a selector function and a probability
+// where selector function 'F' is called with probability 'P'
+// where 'P' is a value between 0 and 1
+// 0 = never called, 1 = called every time we need a new genome to mate
 type SelectorFunctionProbability struct {
 	P float32
 	F func([]IGenome, int) *IGenome
@@ -25,12 +32,14 @@ type selector struct {
 	selectorConfig []SelectorFunctionProbability
 }
 
+// NewSelector returns an instance of an ISelector with several SelectorFunctionProbabiities
 func NewSelector(selectorConfig []SelectorFunctionProbability) ISelector {
 	return &selector{
 		selectorConfig: selectorConfig,
 	}
 }
 
+// Go - cycles through the selector function probabilities until one returns a genome
 func (s *selector) Go(genomeArray []IGenome, totalFitness int) *IGenome {
 	for {
 		for _, config := range s.selectorConfig {
@@ -41,6 +50,7 @@ func (s *selector) Go(genomeArray []IGenome, totalFitness int) *IGenome {
 	}
 }
 
+// Roulette is a selection function that selects a genome where genomes that have a higher fitness are more likely to be picked
 func Roulette(genomeArray []IGenome, totalFitness int) *IGenome {
 
 	if len(genomeArray) == 0 {

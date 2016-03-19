@@ -1,9 +1,7 @@
 package ga
 
-import (
-// "fmt"
-)
-
+// IBitsetParse - an interface to an object that is able
+// to parse a bitset into an array of uint64s
 type IBitsetParse interface {
 	SetFormat([]int)
 	Process(*Bitset) []uint64
@@ -14,6 +12,7 @@ type bitsetParse struct {
 	format             []int
 }
 
+// CreateBitsetParse returns an instance of a bitset parser
 func CreateBitsetParse() IBitsetParse {
 	return &bitsetParse{}
 }

@@ -1,5 +1,6 @@
 package ga
 
+// IGenome associates a fitness with a bitset
 type IGenome interface {
 	GetFitness() int
 	SetFitness(int)
@@ -11,6 +12,8 @@ type genome struct {
 	bitset  Bitset
 }
 
+// NewGenome creates a genome with a bitset and
+// a zero'd fitness score
 func NewGenome(bitset Bitset) IGenome {
 	return &genome{bitset: bitset}
 }
