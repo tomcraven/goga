@@ -2,7 +2,6 @@ package main
 
 import (
 	"fmt"
-	"github.com/tomcraven/goga"
 	"image"
 	"image/color"
 	"image/draw"
@@ -13,23 +12,25 @@ import (
 	"os"
 	"runtime"
 	"time"
+
+	"github.com/tomcraven/goga"
 )
 
 const (
 	// Fiddle with these
-	kNumShapes               = 100
-	kPopulationSize          = 100
-	kMaxIterations           = 9999999
-	kBitsPerCoordinateNumber = 9
-	kParallelSimulations     = 24
-	kMaxCircleRadiusFactor   = 3 // larger == smaller max circle size relative to image dimensions
+	numShapes               = 100
+	populationSize          = 100
+	maxIterations           = 9999999
+	bitsPerCoordinateNumber = 9
+	parallelSimulations     = 24
+	maxCircleRadiusFactor   = 3 // larger == smaller max circle size relative to image dimensions
 
 	// Don't fiddle with these...
-	kMaxBoxCornerCoordinateNumber = (1 << kBitsPerCoordinateNumber) - 1
-	kBitsPerColourChannel         = 8 // 0 - 255
-	kBitsPerRect                  = (kBitsPerCoordinateNumber * 4) + (kBitsPerColourChannel * 4)
-	kBitsPerCircle                = (kBitsPerCoordinateNumber * 3) + (kBitsPerColourChannel * 4)
-	kBitsToDescribeWhichShape     = 1
+	maxBoxCornerCoordinateNumber = (1 << bitsPerCoordinateNumber) - 1
+	bitsPerColourChannel         = 8 // 0 - 255
+	bitsPerRect                  = (bitsPerCoordinateNumber * 4) + (bitsPerColourChannel * 4)
+	bitsPerCircle                = (bitsPerCoordinateNumber * 3) + (bitsPerColourChannel * 4)
+	bitsToDescribeWhichShape     = 1
 )
 
 // http://blog.golang.org/go-imagedraw-package
@@ -61,12 +62,12 @@ func createImageFromBitset(bits *ga.Bitset) draw.Image {
 	newImage := image.NewRGBA(inputImageBounds)
 	draw.Draw(newImage, newImage.Bounds(), &image.Uniform{color.RGBA{0, 0, 0, 255}}, image.ZP, draw.Over)
 
-	for i := 0; i < bits.GetSize()/kLargestShapeBits; i++ {
-		shapeBitset := bits.Slice(i*kLargestShapeBits, kLargestShapeBits)
+	for i := 0; i < bits.GetSize()/largestShapeBits; i++ {
+		shapeBitset := bits.Slice(i*largestShapeBits, largestShapeBits)
 
 		shapeType := shapeBitset.Get(0)
 		if shapeType == 0 {
-			rectBitset := shapeBitset.Slice(1, kBitsPerRect)
+			rectBitset := shapeBitset.Slice(1, bitsPerRect)
 			parsedBits := rectBitsetFormat.Process(&rectBitset)
 
 			colour := color.RGBA{
@@ -81,10 +82,10 @@ func createImageFromBitset(bits *ga.Bitset) draw.Image {
 				uint8(parsedBits[7]),
 			}
 
-			x1 := int((float64(parsedBits[0]) / float64(kMaxBoxCornerCoordinateNumber)) * float64(inputImageBounds.Max.X))
-			y1 := int((float64(parsedBits[1]) / float64(kMaxBoxCornerCoordinateNumber)) * float64(inputImageBounds.Max.Y))
-			x2 := int((float64(parsedBits[2]) / float64(kMaxBoxCornerCoordinateNumber)) * float64(inputImageBounds.Max.X))
-			y2 := int((float64(parsedBits[3]) / float64(kMaxBoxCornerCoordinateNumber)) * float64(inputImageBounds.Max.Y))
+			x1 := int((float64(parsedBits[0]) / float64(maxBoxCornerCoordinateNumber)) * float64(inputImageBounds.Max.X))
+			y1 := int((float64(parsedBits[1]) / float64(maxBoxCornerCoordinateNumber)) * float64(inputImageBounds.Max.Y))
+			x2 := int((float64(parsedBits[2]) / float64(maxBoxCornerCoordinateNumber)) * float64(inputImageBounds.Max.X))
+			y2 := int((float64(parsedBits[3]) / float64(maxBoxCornerCoordinateNumber)) * float64(inputImageBounds.Max.Y))
 
 			draw.DrawMask(newImage, image.Rect(x1, y1, x2, y2),
 				&image.Uniform{colour}, image.ZP,
@@ -92,7 +93,7 @@ func createImageFromBitset(bits *ga.Bitset) draw.Image {
 				draw.Over)
 
 		} else {
-			circleBitset := shapeBitset.Slice(1, kBitsPerCircle)
+			circleBitset := shapeBitset.Slice(1, bitsPerCircle)
 			parsedBits := circleBitsetFormat.Process(&circleBitset)
 
 			colour := color.RGBA{
@@ -102,8 +103,8 @@ func createImageFromBitset(bits *ga.Bitset) draw.Image {
 				255,
 			}
 
-			normalisedX := float64(parsedBits[0]) / float64(kMaxBoxCornerCoordinateNumber)
-			normalisedY := float64(parsedBits[1]) / float64(kMaxBoxCornerCoordinateNumber)
+			normalisedX := float64(parsedBits[0]) / float64(maxBoxCornerCoordinateNumber)
+			normalisedY := float64(parsedBits[1]) / float64(maxBoxCornerCoordinateNumber)
 
 			xMin := float64(-inputImageBounds.Max.X)
 			yMin := float64(-inputImageBounds.Max.Y)
@@ -117,9 +118,9 @@ func createImageFromBitset(bits *ga.Bitset) draw.Image {
 			x := int(xMin + (normalisedX * xRange))
 			y := int(yMin + (normalisedY * yRange))
 
-			normalisedR := float64(parsedBits[2]) / float64(kMaxBoxCornerCoordinateNumber)
+			normalisedR := float64(parsedBits[2]) / float64(maxBoxCornerCoordinateNumber)
 			maxR := math.Max(float64(inputImageBounds.Max.X), float64(inputImageBounds.Max.Y))
-			r := int(normalisedR*maxR) / kMaxCircleRadiusFactor
+			r := int(normalisedR*maxR) / maxCircleRadiusFactor
 
 			c := circle{image.Point{x, y}, r, uint8(parsedBits[6])}
 
@@ -217,16 +218,16 @@ func calculateColourDifference(red1, green1, blue1, red2, green2, blue2 uint32) 
 	return math.Pow(differences, 0.5)
 }
 
-type ImageMatcherSimulator struct {
+type imageMatcherSimulator struct {
 	totalIterations int
 }
 
-func (simulator *ImageMatcherSimulator) OnBeginSimulation() {
+func (simulator *imageMatcherSimulator) OnBeginSimulation() {
 }
-func (simulator *ImageMatcherSimulator) OnEndSimulation() {
+func (simulator *imageMatcherSimulator) OnEndSimulation() {
 	simulator.totalIterations++
 }
-func (simulator *ImageMatcherSimulator) Simulate(g *ga.IGenome) {
+func (simulator *imageMatcherSimulator) Simulate(g *ga.IGenome) {
 
 	bits := (*g).GetBits()
 	newImage := createImageFromBitset(bits)
@@ -246,28 +247,28 @@ func (simulator *ImageMatcherSimulator) Simulate(g *ga.IGenome) {
 
 	(*g).SetFitness(int(fitness))
 }
-func (simulator *ImageMatcherSimulator) ExitFunc(g *ga.IGenome) bool {
-	return simulator.totalIterations >= kMaxIterations
+func (simulator *imageMatcherSimulator) ExitFunc(g *ga.IGenome) bool {
+	return simulator.totalIterations >= maxIterations
 }
 
-type MyBitsetCreate struct {
+type myBitsetCreate struct {
 }
 
-func (bc *MyBitsetCreate) Go() ga.Bitset {
+func (bc *myBitsetCreate) Go() ga.Bitset {
 	b := ga.Bitset{}
-	b.Create(kNumShapes * kLargestShapeBits)
+	b.Create(numShapes * largestShapeBits)
 	for i := 0; i < b.GetSize(); i++ {
 		b.Set(i, rand.Intn(2))
 	}
 	return b
 }
 
-type MyEliteConsumer struct {
+type myEliteConsumer struct {
 	currentIter     int
 	previousFitness int
 }
 
-func (ec *MyEliteConsumer) OnElite(g *ga.IGenome) {
+func (ec *myEliteConsumer) OnElite(g *ga.IGenome) {
 	bits := (*g).GetBits()
 	newImage := createImageFromBitset(bits)
 
@@ -295,8 +296,8 @@ func (ec *MyEliteConsumer) OnElite(g *ga.IGenome) {
 }
 
 var (
-	kLargestShapeBits   int
-	kTotalBitsPerGenome int
+	largestShapeBits   int
+	totalBitsPerGenome int
 
 	inputImage image.Image
 
@@ -305,14 +306,14 @@ var (
 )
 
 func init() {
-	kLargestShapeBits = kBitsToDescribeWhichShape
-	if kBitsPerRect > kBitsPerCircle {
-		kLargestShapeBits += kBitsPerRect
+	largestShapeBits = bitsToDescribeWhichShape
+	if bitsPerRect > bitsPerCircle {
+		largestShapeBits += bitsPerRect
 	} else {
-		kLargestShapeBits += kBitsPerCircle
+		largestShapeBits += bitsPerCircle
 	}
 
-	kTotalBitsPerGenome = kLargestShapeBits * kNumShapes
+	totalBitsPerGenome = largestShapeBits * numShapes
 }
 
 func getImageFromFile(filename string) image.Image {
@@ -331,20 +332,20 @@ func main() {
 
 	rectBitsetFormat = ga.CreateBitsetParse()
 	rectBitsetFormat.SetFormat([]int{
-		kBitsPerCoordinateNumber, kBitsPerCoordinateNumber, kBitsPerCoordinateNumber, kBitsPerCoordinateNumber,
-		kBitsPerColourChannel, kBitsPerColourChannel, kBitsPerColourChannel, kBitsPerColourChannel,
+		bitsPerCoordinateNumber, bitsPerCoordinateNumber, bitsPerCoordinateNumber, bitsPerCoordinateNumber,
+		bitsPerColourChannel, bitsPerColourChannel, bitsPerColourChannel, bitsPerColourChannel,
 	})
 
 	circleBitsetFormat = ga.CreateBitsetParse()
 	circleBitsetFormat.SetFormat([]int{
-		kBitsPerCoordinateNumber, kBitsPerCoordinateNumber, kBitsPerCoordinateNumber,
-		kBitsPerColourChannel, kBitsPerColourChannel, kBitsPerColourChannel, kBitsPerColourChannel,
+		bitsPerCoordinateNumber, bitsPerCoordinateNumber, bitsPerCoordinateNumber,
+		bitsPerColourChannel, bitsPerColourChannel, bitsPerColourChannel, bitsPerColourChannel,
 	})
 
 	genAlgo := ga.NewGeneticAlgorithm()
-	genAlgo.Simulator = &ImageMatcherSimulator{}
-	genAlgo.BitsetCreate = &MyBitsetCreate{}
-	genAlgo.EliteConsumer = &MyEliteConsumer{}
+	genAlgo.Simulator = &imageMatcherSimulator{}
+	genAlgo.BitsetCreate = &myBitsetCreate{}
+	genAlgo.EliteConsumer = &myEliteConsumer{}
 	genAlgo.Mater = ga.NewMater(
 		[]ga.MaterFunctionProbability{
 			{P: 1.0, F: ga.UniformCrossover, UseElite: true},
@@ -368,7 +369,7 @@ func main() {
 		},
 	)
 
-	genAlgo.Init(kPopulationSize, kParallelSimulations)
+	genAlgo.Init(populationSize, parallelSimulations)
 
 	startTime := time.Now()
 	genAlgo.Simulate()

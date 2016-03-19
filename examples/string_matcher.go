@@ -2,21 +2,22 @@ package main
 
 import (
 	"fmt"
-	ga "github.com/tomcraven/goga"
 	"math/rand"
 	"os"
 	"runtime"
 	"time"
+
+	ga "github.com/tomcraven/goga"
 )
 
-type StringMaterSimulator struct {
+type stringMaterSimulator struct {
 }
 
-func (sms *StringMaterSimulator) OnBeginSimulation() {
+func (sms *stringMaterSimulator) OnBeginSimulation() {
 }
-func (sms *StringMaterSimulator) OnEndSimulation() {
+func (sms *stringMaterSimulator) OnEndSimulation() {
 }
-func (sms *StringMaterSimulator) Simulate(g *ga.IGenome) {
+func (sms *stringMaterSimulator) Simulate(g *ga.IGenome) {
 	bits := (*g).GetBits()
 	for i, character := range targetString {
 		for j := 0; j < 8; j++ {
@@ -30,14 +31,14 @@ func (sms *StringMaterSimulator) Simulate(g *ga.IGenome) {
 		}
 	}
 }
-func (sms *StringMaterSimulator) ExitFunc(g *ga.IGenome) bool {
+func (sms *stringMaterSimulator) ExitFunc(g *ga.IGenome) bool {
 	return (*g).GetFitness() == targetLength
 }
 
-type MyBitsetCreate struct {
+type myBitsetCreate struct {
 }
 
-func (bc *MyBitsetCreate) Go() ga.Bitset {
+func (bc *myBitsetCreate) Go() ga.Bitset {
 	b := ga.Bitset{}
 	b.Create(targetLength)
 	for i := 0; i < targetLength; i++ {
@@ -46,11 +47,11 @@ func (bc *MyBitsetCreate) Go() ga.Bitset {
 	return b
 }
 
-type MyEliteConsumer struct {
+type myEliteConsumer struct {
 	currentIter int
 }
 
-func (ec *MyEliteConsumer) OnElite(g *ga.IGenome) {
+func (ec *myEliteConsumer) OnElite(g *ga.IGenome) {
 	gBits := (*g).GetBits()
 	ec.currentIter++
 	var genomeString string
@@ -69,7 +70,7 @@ func (ec *MyEliteConsumer) OnElite(g *ga.IGenome) {
 }
 
 const (
-	kPopulationSize = 600
+	populationSize = 600
 )
 
 var (
@@ -91,9 +92,9 @@ func main() {
 
 	genAlgo := ga.NewGeneticAlgorithm()
 
-	genAlgo.Simulator = &StringMaterSimulator{}
-	genAlgo.BitsetCreate = &MyBitsetCreate{}
-	genAlgo.EliteConsumer = &MyEliteConsumer{}
+	genAlgo.Simulator = &stringMaterSimulator{}
+	genAlgo.BitsetCreate = &myBitsetCreate{}
+	genAlgo.EliteConsumer = &myEliteConsumer{}
 	genAlgo.Mater = ga.NewMater(
 		[]ga.MaterFunctionProbability{
 			{P: 1.0, F: ga.TwoPointCrossover},
@@ -107,7 +108,7 @@ func main() {
 		},
 	)
 
-	genAlgo.Init(kPopulationSize, numThreads)
+	genAlgo.Init(populationSize, numThreads)
 
 	startTime := time.Now()
 	genAlgo.Simulate()
