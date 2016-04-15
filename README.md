@@ -68,19 +68,19 @@ go run image_matcher.go <path_to_image>
 
 Image matcher takes an input image and attempts to produce an output image that is as close to it as possible only using RGBA coloured rectangles and circles. There are a few parameters at the top of the file that are interesting to fiddle with:
 ```
-kNumShapes = 100
-kPopulationSize = 1000
-kMaxIterations = 9999999
-kBitsPerCoordinateNumber = 9
-kParallelSimulations = 24
-kMaxCircleRadiusFactor = 3
+numShapes = 100
+populationSize = 1000
+maxIterations = 9999999
+bitsPerCoordinateNumber = 9
+parallelSimulations = 24
+maxCircleRadiusFactor = 3
 ```
-* kNumShapes - the number of shapes that are used when the algorithm re-creates the input image
-* kPopulationSize - the number of genomes in each population. Each genome can be decoded into a picture. A high value will mean each iteration takes longer, and usually results in the algorithm finding its optimal solution in less iterations.
-* kMaxIterations - the maximum number of simulations/iterations to run. Providing a huge number will essentially run until the algorithm has figured out what it thinks is an optimal solution.
-* kBitsPerCoordinateNumber - Each shape is positioned using coordinates. A rect is represented by the top left and bottom right coordinates, and a circle by its centre. A coordinate is made up of two numbers, each number is represented by this many bits. The number generated is used to calculate a percentage of the overall width/height of the image for the coordinate to be positioned at. For example, if kBitsPerCoordinateNumber is 8, that means the maximum value a coordinte can be is ```0b11111111```, or ```255```. To calculate the coordinates number relative to the image's width and height we normalise this and apply the decimal to the pictures dimensions. For example, if our X coordinate produced by the algorithm is 233, and our images width is 120. ```( 233 / 255 ) * 120 == 109 == our X coordinate```. Setting this to a high value means the algorithm has more accuracy when placing shapes. A low value of 2 or 3 also creates some interesting effects.
-* kParallelSimulations - The number of simulations to run in parallel. A higher value usually means each iteration takes less time, up to a certain point.
-* kMaxCircleRadiusFactor - A number to divide a circles radius by. 1 will mean a circles radius can be anywhere between 1 and max( inputImageWidth, inputImageHeight ). From experimenting, restricting the radius a little creates 'better' images quicker
+* numShapes - the number of shapes that are used when the algorithm re-creates the input image
+* populationSize - the number of genomes in each population. Each genome can be decoded into a picture. A high value will mean each iteration takes longer, and usually results in the algorithm finding its optimal solution in less iterations.
+* maxIterations - the maximum number of simulations/iterations to run. Providing a huge number will essentially run until the algorithm has figured out what it thinks is an optimal solution.
+* bitsPerCoordinateNumber - Each shape is positioned using coordinates. A rect is represented by the top left and bottom right coordinates, and a circle by its centre. A coordinate is made up of two numbers, each number is represented by this many bits. The number generated is used to calculate a percentage of the overall width/height of the image for the coordinate to be positioned at. For example, if bitsPerCoordinateNumber is 8, that means the maximum value a coordinte can be is ```0b11111111```, or ```255```. To calculate the coordinates number relative to the image's width and height we normalise this and apply the decimal to the pictures dimensions. For example, if our X coordinate produced by the algorithm is 233, and our images width is 120. ```( 233 / 255 ) * 120 == 109 == our X coordinate```. Setting this to a high value means the algorithm has more accuracy when placing shapes. A low value of 2 or 3 also creates some interesting effects.
+* parallelSimulations - The number of simulations to run in parallel. A higher value usually means each iteration takes less time, up to a certain point.
+* maxCircleRadiusFactor - A number to divide a circles radius by. 1 will mean a circles radius can be anywhere between 1 and max( inputImageWidth, inputImageHeight ). From experimenting, restricting the radius a little creates 'better' images quicker
 
 The script outputs the 'best' genome from each iteration to "elite.png" as well as the original overlayed in "elite_with_original.png".
 
