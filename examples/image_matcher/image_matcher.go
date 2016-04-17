@@ -8,8 +8,7 @@ import (
 	"os"
 	"runtime"
 	"time"
-
-	"github.com/tomcraven/goga"
+	ga "github.com/tomcraven/goga"
 )
 
 const (
