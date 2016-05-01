@@ -15,6 +15,11 @@ import (
 type myEliteConsumer struct {
 	currentIter     int
 	previousFitness int
+	iterationTime   time.Time
+}
+
+func (ec *myEliteConsumer) OnBeginSimulation() {
+	ec.iterationTime = time.Now()
 }
 
 func (ec *myEliteConsumer) OnElite(g *ga.IGenome) {

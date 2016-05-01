@@ -55,11 +55,11 @@ func (ga *GeneticAlgorithm) Init(populationSize, parallelSimulations int) {
 	ga.parallelSimulations = parallelSimulations
 
 	ga.waitGroup = new(sync.WaitGroup)
-
 }
 
 func (ga *GeneticAlgorithm) beginSimulation() {
 	ga.Simulator.OnBeginSimulation()
+	ga.EliteConsumer.OnBeginSimulation()
 	ga.totalFitness = 0
 
 	ga.genomeSimulationChannel = make(chan *IGenome)
