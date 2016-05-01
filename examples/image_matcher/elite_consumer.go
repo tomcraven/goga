@@ -42,9 +42,8 @@ func (ec *myEliteConsumer) OnElite(g *ga.IGenome) {
 
 	ec.currentIter++
 	fitness := (*g).GetFitness()
-	fmt.Println(ec.currentIter, "\t", fitness, "\t", fitness-ec.previousFitness)
+	fmt.Println(ec.currentIter, "\t", fitness, "\t", fitness-ec.previousFitness, "\t", time.Since(ec.iterationTime))
 
+	ec.iterationTime = time.Now()
 	ec.previousFitness = fitness
-
-	time.Sleep(10 * time.Millisecond)
 }
