@@ -107,5 +107,5 @@ func calculateColourDifference(red1, green1, blue1, red2, green2, blue2 uint32) 
 
 	// Calculate difference
 	differences := distance(l1, l2) + distance(a1, a2) + distance(b1, b2)
-	return math.Pow(differences, 0.5)
+	return differences
 }
