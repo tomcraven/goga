@@ -13,12 +13,14 @@ import (
 
 const (
 	// Fiddle with these
-	numShapes               = 10
+	numShapes               = 100
 	populationSize          = 10
 	maxIterations           = 9999999
-	bitsPerCoordinateNumber = 9
-	parallelSimulations     = 24
-	maxCircleRadiusFactor   = 3 // larger == smaller max circle size relative to image dimensions
+	bitsPerCoordinateNumber = 9 // smaller = more blocky picture (default 9)
+	parallelSimulations     = 1 // number of simulations to run in parallel (default 4 (usually))
+	maxCircleRadiusFactor   = 3 // larger = smaller max circle size relative to image dimensions (default 3)
+	simulationAccuracy      = 1 // smaller = more accurate (min 1) (default 1)
+	shapeSizeMultiplier     = 1.0 // larger = more fitness for smaller shapes (default 1.0)
 
 	// Don't fiddle with these...
 	maxBoxCornerCoordinateNumber = (1 << bitsPerCoordinateNumber) - 1
@@ -27,37 +29,6 @@ const (
 	bitsPerCircle                = (bitsPerCoordinateNumber * 3) + (bitsPerColourChannel * 4)
 	bitsToDescribeWhichShape     = 1
 )
-
-type imageMatcherSimulator struct {
-	totalIterations int
-}
-
-func (simulator *imageMatcherSimulator) OnBeginSimulation() {
-}
-func (simulator *imageMatcherSimulator) OnEndSimulation() {
-	simulator.totalIterations++
-}
-func (simulator *imageMatcherSimulator) Simulate(g *ga.IGenome) {
-	bits := (*g).GetBits()
-	newImage := createImageFromBitset(bits)
-
-	inputImageBounds := inputImage.Bounds()
-	fitness := 0.0
-	for y := 0; y < inputImageBounds.Max.Y; y++ {
-		for x := 0; x < inputImageBounds.Max.X; x++ {
-			inputR, inputG, inputB, _ := inputImage.At(x, y).RGBA()
-			createdR, createdG, createdB, _ := newImage.At(x, y).RGBA()
-			colourDifference := calculateColourDifference(inputR, inputG, inputB, createdR, createdG, createdB)
-
-			fitness += (500.0 - colourDifference)
-		}
-	}
-
-	(*g).SetFitness(int(fitness))
-}
-func (simulator *imageMatcherSimulator) ExitFunc(g *ga.IGenome) bool {
-	return simulator.totalIterations >= maxIterations
-}
 
 type myBitsetCreate struct {
 }
@@ -100,7 +71,6 @@ func getImageFromFile(filename string) image.Image {
 }
 
 func main() {
-
 	runtime.GOMAXPROCS(runtime.NumCPU())
 
 	// Get the input image
@@ -125,17 +95,6 @@ func main() {
 	genAlgo.Mater = ga.NewMater(
 		[]ga.MaterFunctionProbability{
 			{P: 1.0, F: ga.UniformCrossover, UseElite: true},
-			{P: 1.0, F: ga.Mutate},
-			{P: 1.0, F: ga.Mutate},
-			{P: 1.0, F: ga.Mutate},
-			{P: 1.0, F: ga.Mutate},
-			{P: 1.0, F: ga.Mutate},
-			{P: 1.0, F: ga.Mutate},
-			{P: 1.0, F: ga.Mutate},
-			{P: 1.0, F: ga.Mutate},
-			{P: 1.0, F: ga.Mutate},
-			{P: 1.0, F: ga.Mutate},
-			{P: 1.0, F: ga.Mutate},
 			{P: 1.0, F: ga.Mutate},
 		},
 	)
