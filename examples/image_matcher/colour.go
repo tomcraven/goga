@@ -10,77 +10,17 @@ import (
 
 func createImageFromBitset(bits *ga.Bitset) draw.Image {
 	inputImageBounds := inputImage.Bounds()
-
+	
 	newImage := image.NewRGBA(inputImageBounds)
 	draw.Draw(newImage, newImage.Bounds(), &image.Uniform{color.RGBA{0, 0, 0, 255}}, image.ZP, draw.Over)
 
+	sf := shapeFactory{
+		inputImageBounds: inputImage.Bounds(),
+	}
+	
 	for i := 0; i < bits.GetSize()/largestShapeBits; i++ {
 		shapeBitset := bits.Slice(i*largestShapeBits, largestShapeBits)
-
-		shapeType := shapeBitset.Get(0)
-		if shapeType == 0 {
-			rectBitset := shapeBitset.Slice(1, bitsPerRect)
-			parsedBits := rectBitsetFormat.Process(&rectBitset)
-
-			colour := color.RGBA{
-				uint8(parsedBits[4]),
-				uint8(parsedBits[5]),
-				uint8(parsedBits[6]),
-				255,
-			}
-
-			alpha := color.RGBA{
-				255, 255, 255,
-				uint8(parsedBits[7]),
-			}
-
-			x1 := int((float64(parsedBits[0]) / float64(maxBoxCornerCoordinateNumber)) * float64(inputImageBounds.Max.X))
-			y1 := int((float64(parsedBits[1]) / float64(maxBoxCornerCoordinateNumber)) * float64(inputImageBounds.Max.Y))
-			x2 := int((float64(parsedBits[2]) / float64(maxBoxCornerCoordinateNumber)) * float64(inputImageBounds.Max.X))
-			y2 := int((float64(parsedBits[3]) / float64(maxBoxCornerCoordinateNumber)) * float64(inputImageBounds.Max.Y))
-
-			draw.DrawMask(newImage, image.Rect(x1, y1, x2, y2),
-				&image.Uniform{colour}, image.ZP,
-				&image.Uniform{alpha}, image.ZP,
-				draw.Over)
-
-		} else {
-			circleBitset := shapeBitset.Slice(1, bitsPerCircle)
-			parsedBits := circleBitsetFormat.Process(&circleBitset)
-
-			colour := color.RGBA{
-				uint8(parsedBits[3]),
-				uint8(parsedBits[4]),
-				uint8(parsedBits[5]),
-				255,
-			}
-
-			normalisedX := float64(parsedBits[0]) / float64(maxBoxCornerCoordinateNumber)
-			normalisedY := float64(parsedBits[1]) / float64(maxBoxCornerCoordinateNumber)
-
-			xMin := float64(-inputImageBounds.Max.X)
-			yMin := float64(-inputImageBounds.Max.Y)
-
-			xMax := float64(inputImageBounds.Max.X + inputImageBounds.Max.X)
-			yMax := float64(inputImageBounds.Max.Y + inputImageBounds.Max.Y)
-
-			xRange := xMax - xMin
-			yRange := yMax - yMin
-
-			x := int(xMin + (normalisedX * xRange))
-			y := int(yMin + (normalisedY * yRange))
-
-			normalisedR := float64(parsedBits[2]) / float64(maxBoxCornerCoordinateNumber)
-			maxR := math.Max(float64(inputImageBounds.Max.X), float64(inputImageBounds.Max.Y))
-			r := int(normalisedR*maxR) / maxCircleRadiusFactor
-
-			c := circle{image.Point{x, y}, r, uint8(parsedBits[6])}
-
-			draw.DrawMask(newImage, inputImageBounds,
-				&image.Uniform{colour}, image.ZP,
-				&c, image.ZP,
-				draw.Over)
-		}
+		sf.create(&shapeBitset).render(newImage)
 	}
 
 	return newImage
