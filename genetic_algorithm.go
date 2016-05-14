@@ -12,17 +12,17 @@ import (
 // * Simulator - a simulation component used to score each genome in each generation
 // * BitsetCreate - used to create the initial population of genomes
 type GeneticAlgorithm struct {
-	Mater         IMater
-	EliteConsumer IEliteConsumer
-	Simulator     ISimulator
-	Selector      ISelector
-	BitsetCreate  IBitsetCreate
+	Mater         Mater
+	EliteConsumer EliteConsumer
+	Simulator     Simulator
+	Selector      Selector
+	BitsetCreate  BitsetCreate
 
 	populationSize          int
-	population              []IGenome
+	population              []Genome
 	totalFitness            int
-	genomeSimulationChannel chan *IGenome
-	exitFunc                func(*IGenome) bool
+	genomeSimulationChannel chan *Genome
+	exitFunc                func(*Genome) bool
 	waitGroup               *sync.WaitGroup
 	parallelSimulations     int
 }
@@ -39,8 +39,8 @@ func NewGeneticAlgorithm() GeneticAlgorithm {
 	}
 }
 
-func (ga *GeneticAlgorithm) createPopulation() []IGenome {
-	ret := make([]IGenome, ga.populationSize)
+func (ga *GeneticAlgorithm) createPopulation() []Genome {
+	ret := make([]Genome, ga.populationSize)
 	for i := 0; i < ga.populationSize; i++ {
 		ret[i] = NewGenome(ga.BitsetCreate.Go())
 	}
@@ -59,15 +59,14 @@ func (ga *GeneticAlgorithm) Init(populationSize, parallelSimulations int) {
 
 func (ga *GeneticAlgorithm) beginSimulation() {
 	ga.Simulator.OnBeginSimulation()
-	ga.EliteConsumer.OnBeginSimulation()
 	ga.totalFitness = 0
 
-	ga.genomeSimulationChannel = make(chan *IGenome)
+	ga.genomeSimulationChannel = make(chan *Genome)
 
 	// todo: make configurable
 	for i := 0; i < ga.parallelSimulations; i++ {
-		go func(genomeSimulationChannel chan *IGenome,
-			waitGroup *sync.WaitGroup, simulator ISimulator) {
+		go func(genomeSimulationChannel chan *Genome,
+			waitGroup *sync.WaitGroup, simulator Simulator) {
 
 			for genome := range genomeSimulationChannel {
 				defer waitGroup.Done()
@@ -79,7 +78,7 @@ func (ga *GeneticAlgorithm) beginSimulation() {
 	ga.waitGroup.Add(ga.populationSize)
 }
 
-func (ga *GeneticAlgorithm) onNewGenomeToSimulate(g *IGenome) {
+func (ga *GeneticAlgorithm) onNewGenomeToSimulate(g *Genome) {
 	ga.genomeSimulationChannel <- g
 }
 
@@ -88,8 +87,8 @@ func (ga *GeneticAlgorithm) syncSimulatingGenomes() {
 	ga.waitGroup.Wait()
 }
 
-func (ga *GeneticAlgorithm) getElite() *IGenome {
-	var ret *IGenome
+func (ga *GeneticAlgorithm) getElite() *Genome {
+	var ret *Genome
 	for i := 0; i < ga.populationSize; i++ {
 		if ret == nil || ga.population[i].GetFitness() > (*ret).GetFitness() {
 			ret = &ga.population[i]
@@ -101,12 +100,12 @@ func (ga *GeneticAlgorithm) getElite() *IGenome {
 // SimulateUntil simulates a population until 'exitFunc' returns true
 // The 'exitFunc' is passed the elite of each population and should return true
 // if the elite reaches a certain criteria (e.g. fitness above a certain threshold)
-func (ga *GeneticAlgorithm) SimulateUntil(exitFunc func(*IGenome) bool) bool {
+func (ga *GeneticAlgorithm) SimulateUntil(exitFunc func(*Genome) bool) bool {
 	ga.exitFunc = exitFunc
 	return ga.Simulate()
 }
 
-func (ga *GeneticAlgorithm) shouldExit(elite *IGenome) bool {
+func (ga *GeneticAlgorithm) shouldExit(elite *Genome) bool {
 	if ga.exitFunc == nil {
 		return ga.Simulator.ExitFunc(elite)
 	}
@@ -163,6 +162,6 @@ func (ga *GeneticAlgorithm) Simulate() bool {
 }
 
 // GetPopulation returns the population
-func (ga *GeneticAlgorithm) GetPopulation() []IGenome {
+func (ga *GeneticAlgorithm) GetPopulation() []Genome {
 	return ga.population
 }

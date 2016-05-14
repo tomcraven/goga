@@ -1,11 +1,11 @@
 package ga
 
-// IBitsetCreate - an interface to a bitset create struct
-type IBitsetCreate interface {
+// BitsetCreate - an interface to a bitset create struct
+type BitsetCreate interface {
 	Go() Bitset
 }
 
-// NullBitsetCreate - a null implementation of the IBitsetCreate interface
+// NullBitsetCreate - a null implementation of the BitsetCreate interface
 type NullBitsetCreate struct {
 }
 

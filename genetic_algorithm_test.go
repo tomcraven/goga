@@ -17,9 +17,9 @@ type GeneticAlgorithmSuite struct {
 
 var _ = Suite(&GeneticAlgorithmSuite{})
 
-func helperGenerateExitFunction(numIterations int) func(*ga.IGenome) bool {
+func helperGenerateExitFunction(numIterations int) func(*ga.Genome) bool {
 	totalIterations := 0
-	return func(*ga.IGenome) bool {
+	return func(*ga.Genome) bool {
 		totalIterations++
 		if totalIterations >= numIterations {
 			return true
@@ -31,7 +31,7 @@ func helperGenerateExitFunction(numIterations int) func(*ga.IGenome) bool {
 func (s *GeneticAlgorithmSuite) TestShouldSimulateUntil(t *C) {
 
 	callCount := 0
-	exitFunc := func(g *ga.IGenome) bool {
+	exitFunc := func(g *ga.Genome) bool {
 		callCount++
 		return true
 	}
@@ -43,7 +43,7 @@ func (s *GeneticAlgorithmSuite) TestShouldSimulateUntil(t *C) {
 	t.Assert(callCount, Equals, 1)
 
 	callCount = 0
-	exitFunc2 := func(g *ga.IGenome) bool {
+	exitFunc2 := func(g *ga.Genome) bool {
 		callCount++
 		if callCount >= 2 {
 			return true
@@ -58,13 +58,13 @@ func (s *GeneticAlgorithmSuite) TestShouldSimulateUntil(t *C) {
 func (s *GeneticAlgorithmSuite) TestShouldCallMaterAppropriately_1(t *C) {
 
 	numCalls1 := 0
-	mateFunc1 := func(a, b *ga.IGenome) (ga.IGenome, ga.IGenome) {
+	mateFunc1 := func(a, b *ga.Genome) (ga.Genome, ga.Genome) {
 		numCalls1++
 		return *a, *b
 	}
 
 	numCalls2 := 0
-	mateFunc2 := func(a, b *ga.IGenome) (ga.IGenome, ga.IGenome) {
+	mateFunc2 := func(a, b *ga.Genome) (ga.Genome, ga.Genome) {
 		numCalls2++
 		return *a, *b
 	}
@@ -98,7 +98,7 @@ func (s *GeneticAlgorithmSuite) TestShouldCallMaterAppropriately_1(t *C) {
 func (s *GeneticAlgorithmSuite) TestShouldCallMaterAppropriately_2(t *C) {
 
 	numCalls := 0
-	mateFunc := func(a, b *ga.IGenome) (ga.IGenome, ga.IGenome) {
+	mateFunc := func(a, b *ga.Genome) (ga.Genome, ga.Genome) {
 		numCalls++
 		return *a, *b
 	}
@@ -125,7 +125,7 @@ func (s *GeneticAlgorithmSuite) TestShouldCallMaterAppropriately_2(t *C) {
 func (s *GeneticAlgorithmSuite) TestShouldCallMaterAppropriately_OddSizedPopulation(t *C) {
 
 	numCalls := 0
-	mateFunc := func(a, b *ga.IGenome) (ga.IGenome, ga.IGenome) {
+	mateFunc := func(a, b *ga.Genome) (ga.Genome, ga.Genome) {
 		numCalls++
 		return *a, *b
 	}
@@ -152,7 +152,7 @@ type MyEliteConsumerCounter struct {
 	NumCalls int
 }
 
-func (ec *MyEliteConsumerCounter) OnElite(g *ga.IGenome) {
+func (ec *MyEliteConsumerCounter) OnElite(g *ga.Genome) {
 	ec.NumCalls++
 }
 
@@ -174,7 +174,7 @@ func (s *GeneticAlgorithmSuite) TestShouldNotSimulateWithNoPopulation(t *C) {
 	genAlgo := ga.NewGeneticAlgorithm()
 
 	callCount := 0
-	exitFunc := func(g *ga.IGenome) bool {
+	exitFunc := func(g *ga.Genome) bool {
 		callCount++
 		return true
 	}
@@ -223,7 +223,7 @@ type MySimulatorCounter struct {
 	m        sync.Mutex
 }
 
-func (ms *MySimulatorCounter) Simulate(*ga.IGenome) {
+func (ms *MySimulatorCounter) Simulate(*ga.Genome) {
 	ms.m.Lock()
 	ms.NumCalls++
 	ms.m.Unlock()
@@ -232,7 +232,7 @@ func (ms *MySimulatorCounter) OnBeginSimulation() {
 }
 func (ms *MySimulatorCounter) OnEndSimulation() {
 }
-func (ms *MySimulatorCounter) ExitFunc(*ga.IGenome) bool {
+func (ms *MySimulatorCounter) ExitFunc(*ga.Genome) bool {
 	return false
 }
 
@@ -259,7 +259,7 @@ type MySimulatorFitness struct {
 	m                     sync.Mutex
 }
 
-func (ms *MySimulatorFitness) Simulate(g *ga.IGenome) {
+func (ms *MySimulatorFitness) Simulate(g *ga.Genome) {
 	ms.m.Lock()
 	randomFitness := rand.Intn(1000)
 	if randomFitness > ms.currentLargestFitness {
@@ -274,7 +274,7 @@ func (ms *MySimulatorFitness) OnBeginSimulation() {
 func (ms *MySimulatorFitness) OnEndSimulation() {
 	ms.LargestFitnessess = append(ms.LargestFitnessess, ms.currentLargestFitness)
 }
-func (ms *MySimulatorFitness) ExitFunc(*ga.IGenome) bool {
+func (ms *MySimulatorFitness) ExitFunc(*ga.Genome) bool {
 	return false
 }
 
@@ -282,7 +282,7 @@ type MyEliteConsumerFitness struct {
 	EliteFitnesses []int
 }
 
-func (ec *MyEliteConsumerFitness) OnElite(g *ga.IGenome) {
+func (ec *MyEliteConsumerFitness) OnElite(g *ga.Genome) {
 	ec.EliteFitnesses = append(ec.EliteFitnesses, (*g).GetFitness())
 }
 
@@ -315,7 +315,7 @@ func (ms *MySimulatorOrder) OnBeginSimulation() {
 	ms.Order = append(ms.Order, 1)
 	ms.SimulateCalled = true
 }
-func (ms *MySimulatorOrder) Simulate(g *ga.IGenome) {
+func (ms *MySimulatorOrder) Simulate(g *ga.Genome) {
 	ms.Order = append(ms.Order, 2)
 	ms.BeginCalled = true
 }
@@ -323,7 +323,7 @@ func (ms *MySimulatorOrder) OnEndSimulation() {
 	ms.Order = append(ms.Order, 3)
 	ms.EndCalled = true
 }
-func (ms *MySimulatorOrder) ExitFunc(*ga.IGenome) bool {
+func (ms *MySimulatorOrder) ExitFunc(*ga.Genome) bool {
 	return false
 }
 
@@ -364,7 +364,7 @@ func (s *GeneticAlgorithmSuite) TestShouldPassEliteToExitFunc(t *C) {
 
 	passedGenomeFitnesses := make([]int, populationSize)
 	callCount := 0
-	exitFunc := func(g *ga.IGenome) bool {
+	exitFunc := func(g *ga.Genome) bool {
 		passedGenomeFitnesses[callCount] = (*g).GetFitness()
 
 		callCount++
@@ -383,7 +383,7 @@ func (s *GeneticAlgorithmSuite) TestShouldNotCallMaterWithGenomesFromPopulation(
 
 	genAlgo := ga.NewGeneticAlgorithm()
 
-	mateFunc := func(a, b *ga.IGenome) (ga.IGenome, ga.IGenome) {
+	mateFunc := func(a, b *ga.Genome) (ga.Genome, ga.Genome) {
 		population := genAlgo.GetPopulation()
 		aFound, bFound := false, false
 		for i := range population {
@@ -421,7 +421,7 @@ type MySelectorCounter struct {
 	CallCount int
 }
 
-func (ms *MySelectorCounter) Go(genomes []ga.IGenome, totalFitness int) *ga.IGenome {
+func (ms *MySelectorCounter) Go(genomes []ga.Genome, totalFitness int) *ga.Genome {
 	ms.CallCount++
 	return &genomes[0]
 }
@@ -443,25 +443,25 @@ func (s *GeneticAlgorithmSuite) TestShouldCallSelectorAppropriately(t *C) {
 }
 
 type MySelectorPassCache struct {
-	PassedGenomes []*ga.IGenome
+	PassedGenomes []*ga.Genome
 }
 
-func (ms *MySelectorPassCache) Go(genomes []ga.IGenome, totalFitness int) *ga.IGenome {
+func (ms *MySelectorPassCache) Go(genomes []ga.Genome, totalFitness int) *ga.Genome {
 	randomGenome := &genomes[rand.Intn(len(genomes))]
 	ms.PassedGenomes = append(ms.PassedGenomes, randomGenome)
 	return randomGenome
 }
 
 type MyMaterPassCache struct {
-	PassedGenomes []*ga.IGenome
+	PassedGenomes []*ga.Genome
 }
 
-func (ms *MyMaterPassCache) Go(a, b *ga.IGenome) (ga.IGenome, ga.IGenome) {
+func (ms *MyMaterPassCache) Go(a, b *ga.Genome) (ga.Genome, ga.Genome) {
 	ms.PassedGenomes = append(ms.PassedGenomes, a)
 	ms.PassedGenomes = append(ms.PassedGenomes, b)
 	return *a, *b
 }
-func (ms *MyMaterPassCache) OnElite(*ga.IGenome) {
+func (ms *MyMaterPassCache) OnElite(*ga.Genome) {
 }
 
 func (s *GeneticAlgorithmSuite) TestShouldPassSelectedGenomesToMater(t *C) {
@@ -505,11 +505,11 @@ func (s *GeneticAlgorithmSuite) TestShouldCallIntoBitsetCreate(t *C) {
 }
 
 type MyMaterPassCache2 struct {
-	PassedGenomes  []ga.IGenome
+	PassedGenomes  []ga.Genome
 	runningFitness int
 }
 
-func (ms *MyMaterPassCache2) Go(a, b *ga.IGenome) (ga.IGenome, ga.IGenome) {
+func (ms *MyMaterPassCache2) Go(a, b *ga.Genome) (ga.Genome, ga.Genome) {
 
 	g1, g2 := ga.NewGenome(ga.Bitset{}), ga.NewGenome(ga.Bitset{})
 
@@ -523,7 +523,7 @@ func (ms *MyMaterPassCache2) Go(a, b *ga.IGenome) (ga.IGenome, ga.IGenome) {
 
 	return g1, g2
 }
-func (ms *MyMaterPassCache2) OnElite(*ga.IGenome) {
+func (ms *MyMaterPassCache2) OnElite(*ga.Genome) {
 }
 
 func (s *GeneticAlgorithmSuite) TestShouldReplaceOldPopulationWithMatedOne(t *C) {
@@ -554,7 +554,7 @@ type MySimulatorCallTracker struct {
 	m                       sync.Mutex
 }
 
-func (ms *MySimulatorCallTracker) Simulate(*ga.IGenome) {
+func (ms *MySimulatorCallTracker) Simulate(*ga.Genome) {
 	ms.m.Lock()
 	ms.NumSimulateCalls++
 	ms.m.Unlock()
@@ -564,7 +564,7 @@ func (ms *MySimulatorCallTracker) OnBeginSimulation() {
 }
 func (ms *MySimulatorCallTracker) OnEndSimulation() {
 }
-func (ms *MySimulatorCallTracker) ExitFunc(*ga.IGenome) bool {
+func (ms *MySimulatorCallTracker) ExitFunc(*ga.Genome) bool {
 	return (ms.NumBeginSimulationCalls >= ms.NumBeginSimulationsUntilExit)
 }
 

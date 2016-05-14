@@ -4,9 +4,9 @@ import (
 	"math/rand"
 )
 
-// ISelector - a selector interface used to pick 2 genomes to mate
-type ISelector interface {
-	Go([]IGenome, int) *IGenome
+// Selector - a selector interface used to pick 2 genomes to mate
+type Selector interface {
+	Go([]Genome, int) *Genome
 }
 
 // NullSelector - a null implementation of the Selector interface
@@ -14,7 +14,7 @@ type NullSelector struct {
 }
 
 // Go - a null implementation of Selector's 'go'
-func (ns *NullSelector) Go(genomes []IGenome, totalFitness int) *IGenome {
+func (ns *NullSelector) Go(genomes []Genome, totalFitness int) *Genome {
 	return &genomes[0]
 }
 
@@ -25,22 +25,22 @@ func (ns *NullSelector) Go(genomes []IGenome, totalFitness int) *IGenome {
 // 0 = never called, 1 = called every time we need a new genome to mate
 type SelectorFunctionProbability struct {
 	P float32
-	F func([]IGenome, int) *IGenome
+	F func([]Genome, int) *Genome
 }
 
 type selector struct {
 	selectorConfig []SelectorFunctionProbability
 }
 
-// NewSelector returns an instance of an ISelector with several SelectorFunctionProbabiities
-func NewSelector(selectorConfig []SelectorFunctionProbability) ISelector {
+// NewSelector returns an instance of an Selector with several SelectorFunctionProbabiities
+func NewSelector(selectorConfig []SelectorFunctionProbability) Selector {
 	return &selector{
 		selectorConfig: selectorConfig,
 	}
 }
 
 // Go - cycles through the selector function probabilities until one returns a genome
-func (s *selector) Go(genomeArray []IGenome, totalFitness int) *IGenome {
+func (s *selector) Go(genomeArray []Genome, totalFitness int) *Genome {
 	for {
 		for _, config := range s.selectorConfig {
 			if rand.Float32() < config.P {
@@ -51,7 +51,7 @@ func (s *selector) Go(genomeArray []IGenome, totalFitness int) *IGenome {
 }
 
 // Roulette is a selection function that selects a genome where genomes that have a higher fitness are more likely to be picked
-func Roulette(genomeArray []IGenome, totalFitness int) *IGenome {
+func Roulette(genomeArray []Genome, totalFitness int) *Genome {
 
 	if len(genomeArray) == 0 {
 		panic("genome array contains no elements")

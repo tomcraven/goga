@@ -9,7 +9,7 @@ import (
 )
 
 type SelectorSuite struct {
-	selector ga.ISelector
+	selector ga.Selector
 }
 
 var _ = Suite(&SelectorSuite{})
@@ -22,7 +22,7 @@ func (s *SelectorSuite) TestShouldRoulette(t *C) {
 
 	// for i := 0; i < 100; i++ {
 	// 	numGenomes := 100
-	// 	genomeArray := make( []ga.IGenome, numGenomes )
+	// 	genomeArray := make( []ga.Genome, numGenomes )
 	// 	totalFitness := 0
 	// 	for i := 0; i < numGenomes; i++ {
 	// 		genomeArray[i] = ga.NewGenome( ga.Bitset{} )
@@ -52,7 +52,7 @@ func (s *SelectorSuite) TestShouldRoulette(t *C) {
 func (s *SelectorSuite) TestShouldRouletteWhenTotalFitnessIs0(t *C) {
 
 	numGenomes := 10
-	genomeArray := make([]ga.IGenome, numGenomes)
+	genomeArray := make([]ga.Genome, numGenomes)
 	for i := 0; i < numGenomes; i++ {
 		genomeArray[i] = ga.NewGenome(ga.Bitset{})
 		genomeArray[i].SetFitness(i)
@@ -63,7 +63,7 @@ func (s *SelectorSuite) TestShouldRouletteWhenTotalFitnessIs0(t *C) {
 
 func (s *SelectorSuite) TestShouldPanicWithMismatchedFitness(t *C) {
 	numGenomes := 10
-	genomeArray := make([]ga.IGenome, numGenomes)
+	genomeArray := make([]ga.Genome, numGenomes)
 	for i := 0; i < numGenomes; i++ {
 		genomeArray[i] = ga.NewGenome(ga.Bitset{})
 		genomeArray[i].SetFitness(1)
@@ -74,14 +74,14 @@ func (s *SelectorSuite) TestShouldPanicWithMismatchedFitness(t *C) {
 }
 
 func (s *SelectorSuite) TestShouldPanicWhenGenomeArrayLengthIs0(t *C) {
-	genomeArray := []ga.IGenome{}
+	genomeArray := []ga.Genome{}
 	t.Assert(len(genomeArray), Equals, 0)
 	t.Assert(func() { ga.Roulette(genomeArray, 0) }, Panics, "genome array contains no elements")
 }
 
 func (s *SelectorSuite) TestShouldPassBackGenomeFromGenomeArray(t *C) {
 	numGenomes := 10
-	genomeArray := make([]ga.IGenome, numGenomes)
+	genomeArray := make([]ga.Genome, numGenomes)
 
 	for i := range genomeArray {
 		genomeArray[i] = ga.NewGenome(ga.Bitset{})
@@ -109,11 +109,11 @@ func (s *SelectorSuite) TestShouldConfig_Multiple(t *C) {
 	for i := 0; i < 100; i++ {
 		numCalls1 := 0
 		numCalls2 := 0
-		myFunc1 := func(array []ga.IGenome, totalFitness int) *ga.IGenome {
+		myFunc1 := func(array []ga.Genome, totalFitness int) *ga.Genome {
 			numCalls1++
 			return &array[0]
 		}
-		myFunc2 := func(array []ga.IGenome, totalFitness int) *ga.IGenome {
+		myFunc2 := func(array []ga.Genome, totalFitness int) *ga.Genome {
 			numCalls2++
 			return &array[0]
 		}
@@ -126,7 +126,7 @@ func (s *SelectorSuite) TestShouldConfig_Multiple(t *C) {
 		)
 
 		numIterations := 1000
-		genomeArray := make([]ga.IGenome, 10)
+		genomeArray := make([]ga.Genome, 10)
 		for i := 0; i < numIterations; i++ {
 			s.Go(genomeArray, 100)
 		}

@@ -8,7 +8,7 @@ import (
 )
 
 type MaterSuite struct {
-	mater ga.IMater
+	mater ga.Mater
 }
 
 func (s *MaterSuite) SetUpTest(t *C) {
@@ -42,7 +42,7 @@ func (s *MaterSuite) TestGoShouldReturn2NewGenomes(t *C) {
 
 	c1, c2 := s.mater.Go(&g1, &g2)
 
-	var iGenome ga.IGenome
+	var iGenome ga.Genome
 	t.Assert(c1, Implements, &iGenome)
 	t.Assert(c2, Implements, &iGenome)
 
@@ -63,7 +63,7 @@ func (s *MaterSuite) TestShouldOnePointCrossover_DifferentBitset(t *C) {
 		g1, g2 := ga.NewGenome(b1), ga.NewGenome(b2)
 		c1, c2 := ga.OnePointCrossover(&g1, &g2)
 
-		var iGenome ga.IGenome
+		var iGenome ga.Genome
 		t.Assert(c1, Implements, &iGenome)
 		t.Assert(c2, Implements, &iGenome)
 
@@ -101,7 +101,7 @@ func (s *MaterSuite) TestShouldTwoPointCrossOver_DifferentBitset(t *C) {
 		g1, g2 := ga.NewGenome(b1), ga.NewGenome(b2)
 		c1, c2 := ga.TwoPointCrossover(&g1, &g2)
 
-		var iGenome ga.IGenome
+		var iGenome ga.Genome
 		t.Assert(c1, Implements, &iGenome)
 		t.Assert(c2, Implements, &iGenome)
 
@@ -287,7 +287,7 @@ func (s *MaterSuite) TestShouldUniformCrossover_DifferentSizedBitsets(t *C) {
 func (s *MaterSuite) TestShouldConfig_Single(t *C) {
 
 	numCalls := 0
-	myFunc := func(a, b *ga.IGenome) (ga.IGenome, ga.IGenome) {
+	myFunc := func(a, b *ga.Genome) (ga.Genome, ga.Genome) {
 		numCalls++
 		return *a, *b
 	}
@@ -315,11 +315,11 @@ func (s *MaterSuite) TestShouldConfig_Multiple(t *C) {
 	for i := 0; i < 100; i++ {
 		numCalls1 := 0
 		numCalls2 := 0
-		myFunc1 := func(a, b *ga.IGenome) (ga.IGenome, ga.IGenome) {
+		myFunc1 := func(a, b *ga.Genome) (ga.Genome, ga.Genome) {
 			numCalls1++
 			return *a, *b
 		}
-		myFunc2 := func(a, b *ga.IGenome) (ga.IGenome, ga.IGenome) {
+		myFunc2 := func(a, b *ga.Genome) (ga.Genome, ga.Genome) {
 			numCalls2++
 			return *a, *b
 		}
@@ -360,7 +360,7 @@ func (s *MaterSuite) TestShouldMutate(t *C) {
 		g1, g2 := ga.NewGenome(b1), ga.NewGenome(b1)
 		c1, c2 := ga.Mutate(&g1, &g2)
 
-		var iGenome ga.IGenome
+		var iGenome ga.Genome
 		t.Assert(c1, Implements, &iGenome)
 		t.Assert(c2, Implements, &iGenome)
 
@@ -385,7 +385,7 @@ func (s *MaterSuite) TestShouldMutate(t *C) {
 func (s *MaterSuite) TestShouldUseEliteFromConfigSettings(t *C) {
 
 	elite := ga.NewGenome(ga.Bitset{})
-	myFunc := func(a, b *ga.IGenome) (ga.IGenome, ga.IGenome) {
+	myFunc := func(a, b *ga.Genome) (ga.Genome, ga.Genome) {
 		t.Assert(b, Equals, &elite)
 		return *a, *b
 	}

@@ -17,7 +17,7 @@ func (sms *stringMaterSimulator) OnBeginSimulation() {
 }
 func (sms *stringMaterSimulator) OnEndSimulation() {
 }
-func (sms *stringMaterSimulator) Simulate(g *ga.IGenome) {
+func (sms *stringMaterSimulator) Simulate(g *ga.Genome) {
 	bits := (*g).GetBits()
 	for i, character := range targetString {
 		for j := 0; j < 8; j++ {
@@ -31,7 +31,7 @@ func (sms *stringMaterSimulator) Simulate(g *ga.IGenome) {
 		}
 	}
 }
-func (sms *stringMaterSimulator) ExitFunc(g *ga.IGenome) bool {
+func (sms *stringMaterSimulator) ExitFunc(g *ga.Genome) bool {
 	return (*g).GetFitness() == targetLength
 }
 
@@ -51,7 +51,7 @@ type myEliteConsumer struct {
 	currentIter int
 }
 
-func (ec *myEliteConsumer) OnElite(g *ga.IGenome) {
+func (ec *myEliteConsumer) OnElite(g *ga.Genome) {
 	gBits := (*g).GetBits()
 	ec.currentIter++
 	var genomeString string

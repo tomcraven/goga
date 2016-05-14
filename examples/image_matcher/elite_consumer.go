@@ -22,7 +22,7 @@ func (ec *myEliteConsumer) OnBeginSimulation() {
 	ec.iterationTime = time.Now()
 }
 
-func (ec *myEliteConsumer) OnElite(g *ga.IGenome) {
+func (ec *myEliteConsumer) OnElite(g *ga.Genome) {
 	bits := (*g).GetBits()
 	newImage := createImageFromBitset(bits)
 

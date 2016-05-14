@@ -15,7 +15,7 @@ func (simulator *imageMatcherSimulator) OnBeginSimulation() {
 func (simulator *imageMatcherSimulator) OnEndSimulation() {
 	simulator.totalIterations++
 }
-func (simulator *imageMatcherSimulator) Simulate(g *ga.IGenome) {
+func (simulator *imageMatcherSimulator) Simulate(g *ga.Genome) {
 	bits := (*g).GetBits()
 
 	currentTime := time.Now()
@@ -67,6 +67,6 @@ func (simulator *imageMatcherSimulator) Simulate(g *ga.IGenome) {
 
 	(*g).SetFitness(int(fitness))
 }
-func (simulator *imageMatcherSimulator) ExitFunc(g *ga.IGenome) bool {
+func (simulator *imageMatcherSimulator) ExitFunc(g *ga.Genome) bool {
 	return simulator.totalIterations >= maxIterations
 }

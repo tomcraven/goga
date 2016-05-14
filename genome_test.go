@@ -7,7 +7,7 @@ import (
 )
 
 type GenomeSuite struct {
-	genome ga.IGenome
+	genome ga.Genome
 }
 
 func (s *GenomeSuite) SetUpTest(t *C) {
