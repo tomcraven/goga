@@ -6,6 +6,7 @@ install:
 before_install:
   - go get github.com/axw/gocov/gocov
   - go get github.com/mattn/goveralls
+  - go get github.com/tomcraven/bitset
   - if ! go get github.com/golang/tools/cmd/cover; then go get golang.org/x/tools/cmd/cover; fi
 script:
     - $HOME/gopath/bin/goveralls -service=travis-ci
