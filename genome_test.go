@@ -3,7 +3,8 @@ package ga_test
 import (
 	. "gopkg.in/check.v1"
 
-	"github.com/tomcraven/goga"
+	"github.com/tomcraven/bitset"
+	ga "github.com/tomcraven/goga"
 )
 
 type GenomeSuite struct {
@@ -11,7 +12,7 @@ type GenomeSuite struct {
 }
 
 func (s *GenomeSuite) SetUpTest(t *C) {
-	s.genome = ga.NewGenome(ga.Bitset{})
+	s.genome = ga.NewGenome(bitset.Create(0))
 }
 func (s *GenomeSuite) TearDownTest(t *C) {
 	s.genome = nil
@@ -31,11 +32,10 @@ func (s *GenomeSuite) TestShouldSetGetFitness(t *C) {
 }
 
 func (s *GenomeSuite) TestShouldGetBits(t *C) {
-	b := ga.Bitset{}
-	b.Create(10)
-	b.Set(1, 1)
-	b.Set(9, 1)
+	b := bitset.Create(10)
+	b.Set(1)
+	b.Set(9)
 
 	g := ga.NewGenome(b)
-	t.Assert(&b, DeepEquals, g.GetBits())
+	t.Assert(b.Equals(g.GetBits()), IsTrue)
 }

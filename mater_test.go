@@ -3,8 +3,8 @@ package ga_test
 import (
 	. "gopkg.in/check.v1"
 
-	"github.com/tomcraven/goga"
-	// "fmt"
+	"github.com/tomcraven/bitset"
+	ga "github.com/tomcraven/goga"
 )
 
 type MaterSuite struct {
@@ -25,17 +25,17 @@ func (s *MaterSuite) TestShouldInstantiate(t *C) {
 }
 
 func (s *MaterSuite) TestGoShouldAccept2GenomePointers(t *C) {
-	g1, g2 := ga.NewGenome(ga.Bitset{}), ga.NewGenome(ga.Bitset{})
+	g1 := ga.NewGenome(bitset.Create(0))
+	g2 := ga.NewGenome(bitset.Create(0))
 	s.mater.Go(&g1, &g2)
 }
 
 func (s *MaterSuite) TestGoShouldReturn2NewGenomes(t *C) {
 
-	b1, b2 := ga.Bitset{}, ga.Bitset{}
-	b1.Create(10)
-	b2.Create(10)
-	b1.SetAll(0)
-	b2.SetAll(1)
+	b1 := bitset.Create(10)
+	b2 := bitset.Create(10)
+	b1.ClearAll()
+	b2.SetAll()
 
 	g1, g2 := ga.NewGenome(b1), ga.NewGenome(b2)
 	t.Assert(g1, Not(DeepEquals), g2)
@@ -53,12 +53,12 @@ func (s *MaterSuite) TestGoShouldReturn2NewGenomes(t *C) {
 func (s *MaterSuite) TestShouldOnePointCrossover_DifferentBitset(t *C) {
 
 	for i := 0; i < 100; i++ {
-		b1, b2 := ga.Bitset{}, ga.Bitset{}
-		genomeSize := 10
-		b1.Create(genomeSize)
-		b2.Create(genomeSize)
-		b1.SetAll(0)
-		b2.SetAll(1)
+		genomeSize := uint(10)
+		b1 := bitset.Create(genomeSize)
+		b2 := bitset.Create(genomeSize)
+
+		b1.ClearAll()
+		b2.SetAll()
 
 		g1, g2 := ga.NewGenome(b1), ga.NewGenome(b2)
 		c1, c2 := ga.OnePointCrossover(&g1, &g2)
@@ -75,7 +75,7 @@ func (s *MaterSuite) TestShouldOnePointCrossover_DifferentBitset(t *C) {
 		crossoverPoints := 0
 		c1Bits, c2Bits := c1.GetBits(), c2.GetBits()
 		startingBitValue := c1Bits.Get(0)
-		for i := 0; i < genomeSize; i++ {
+		for i := uint(0); i < genomeSize; i++ {
 			t.Assert(c1Bits.Get(i), Not(Equals), c2Bits.Get(i), Commentf("Index [%v]", i))
 
 			// Find the crossover point
@@ -91,12 +91,12 @@ func (s *MaterSuite) TestShouldOnePointCrossover_DifferentBitset(t *C) {
 func (s *MaterSuite) TestShouldTwoPointCrossOver_DifferentBitset(t *C) {
 
 	for i := 0; i < 100; i++ {
-		b1, b2 := ga.Bitset{}, ga.Bitset{}
-		genomeSize := 10
-		b1.Create(genomeSize)
-		b2.Create(genomeSize)
-		b1.SetAll(0)
-		b2.SetAll(1)
+		genomeSize := uint(10)
+		b1 := bitset.Create(genomeSize)
+		b2 := bitset.Create(genomeSize)
+
+		b1.ClearAll()
+		b2.SetAll()
 
 		g1, g2 := ga.NewGenome(b1), ga.NewGenome(b2)
 		c1, c2 := ga.TwoPointCrossover(&g1, &g2)
@@ -113,7 +113,7 @@ func (s *MaterSuite) TestShouldTwoPointCrossOver_DifferentBitset(t *C) {
 		crossoverPoints := 0
 		c1Bits, c2Bits := c1.GetBits(), c2.GetBits()
 		startingBitValue := c1Bits.Get(0)
-		for i := 0; i < genomeSize; i++ {
+		for i := uint(0); i < genomeSize; i++ {
 			t.Assert(c1Bits.Get(i), Not(Equals), c2Bits.Get(i), Commentf("Index [%v]", i))
 
 			// Find the crossover point
@@ -129,12 +129,12 @@ func (s *MaterSuite) TestShouldTwoPointCrossOver_DifferentBitset(t *C) {
 func (s *MaterSuite) TestShouldUniformCrossover(t *C) {
 
 	for i := 0; i < 10; i++ {
-		b1, b2 := ga.Bitset{}, ga.Bitset{}
-		genomeSize := 1000
-		b1.Create(genomeSize)
-		b2.Create(genomeSize)
-		b1.SetAll(0)
-		b2.SetAll(1)
+		genomeSize := uint(1000)
+		b1 := bitset.Create(genomeSize)
+		b2 := bitset.Create(genomeSize)
+
+		b1.ClearAll()
+		b2.SetAll()
 
 		g1, g2 := ga.NewGenome(b1), ga.NewGenome(b2)
 		c1, c2 := ga.UniformCrossover(&g1, &g2)
@@ -142,7 +142,8 @@ func (s *MaterSuite) TestShouldUniformCrossover(t *C) {
 		c1Bits, c2Bits := c1.GetBits(), c2.GetBits()
 		crossoverPoints := 0
 		startingBitValue := c1Bits.Get(0)
-		for i := 0; i < genomeSize; i++ {
+
+		for i := uint(0); i < genomeSize; i++ {
 			t.Assert(c1Bits.Get(i), Not(Equals), c2Bits.Get(i), Commentf("Index [%v]", i))
 
 			// Find the crossover point
@@ -152,8 +153,8 @@ func (s *MaterSuite) TestShouldUniformCrossover(t *C) {
 			}
 		}
 
-		sixtyPercent := (genomeSize / 100) * 60
-		fourtyPercent := (genomeSize / 100) * 40
+		sixtyPercent := int((genomeSize / 100) * 60)
+		fourtyPercent := int((genomeSize / 100) * 40)
 		t.Assert(crossoverPoints > fourtyPercent, IsTrue)
 		t.Assert(crossoverPoints < sixtyPercent, IsTrue)
 	}
@@ -162,40 +163,42 @@ func (s *MaterSuite) TestShouldUniformCrossover(t *C) {
 func (s *MaterSuite) TestShouldOnePointCrossover_DifferentSizedBitsets(t *C) {
 
 	for i := 0; i < 100; i++ {
-		b1, b2 := ga.Bitset{}, ga.Bitset{}
-		genomeSize1 := 10
-		genomeSize2 := 5
-		b1.Create(genomeSize1)
-		b2.Create(genomeSize2)
-		b1.SetAll(0)
-		b2.SetAll(1)
+		genomeSize1 := uint(10)
+		genomeSize2 := uint(5)
+
+		b1 := bitset.Create(genomeSize1)
+		b2 := bitset.Create(genomeSize2)
+
+		b1.ClearAll()
+		b2.SetAll()
 
 		g1, g2 := ga.NewGenome(b1), ga.NewGenome(b2)
 		c1, c2 := ga.OnePointCrossover(&g1, &g2)
 
 		c1Bits, c2Bits := c1.GetBits(), c2.GetBits()
-		oneHasSize10 := (c1Bits.GetSize() == 10) || (c2Bits.GetSize() == 10)
+		oneHasSize10 := (c1Bits.Size() == uint(10)) || (c2Bits.Size() == uint(10))
 		t.Assert(oneHasSize10, IsTrue)
-		oneHasSize5 := (c1Bits.GetSize() == 5) || (c2Bits.GetSize() == 5)
+		oneHasSize5 := (c1Bits.Size() == uint(5)) || (c2Bits.Size() == uint(5))
 		t.Assert(oneHasSize5, IsTrue)
 	}
 
 	for i := 0; i < 100; i++ {
-		b1, b2 := ga.Bitset{}, ga.Bitset{}
-		genomeSize1 := 5
-		genomeSize2 := 10
-		b1.Create(genomeSize1)
-		b2.Create(genomeSize2)
-		b1.SetAll(0)
-		b2.SetAll(1)
+		genomeSize1 := uint(5)
+		genomeSize2 := uint(10)
+
+		b1 := bitset.Create(genomeSize1)
+		b2 := bitset.Create(genomeSize2)
+
+		b1.ClearAll()
+		b2.SetAll()
 
 		g1, g2 := ga.NewGenome(b1), ga.NewGenome(b2)
 		c1, c2 := ga.OnePointCrossover(&g1, &g2)
 
 		c1Bits, c2Bits := c1.GetBits(), c2.GetBits()
-		oneHasSize10 := (c1Bits.GetSize() == 10) || (c2Bits.GetSize() == 10)
+		oneHasSize10 := (c1Bits.Size() == uint(10)) || (c2Bits.Size() == uint(10))
 		t.Assert(oneHasSize10, IsTrue)
-		oneHasSize5 := (c1Bits.GetSize() == 5) || (c2Bits.GetSize() == 5)
+		oneHasSize5 := (c1Bits.Size() == uint(5)) || (c2Bits.Size() == uint(5))
 		t.Assert(oneHasSize5, IsTrue)
 	}
 }
@@ -203,42 +206,42 @@ func (s *MaterSuite) TestShouldOnePointCrossover_DifferentSizedBitsets(t *C) {
 func (s *MaterSuite) TestShouldTwoPointCrossover_DifferentSizedBitsets(t *C) {
 
 	for i := 0; i < 100; i++ {
-		b1, b2 := ga.Bitset{}, ga.Bitset{}
-		genomeSize1 := 10
-		genomeSize2 := 5
-		b1.Create(genomeSize1)
-		b2.Create(genomeSize2)
-		b1.SetAll(0)
-		b2.SetAll(1)
+		genomeSize1 := uint(10)
+		genomeSize2 := uint(5)
+
+		b1 := bitset.Create(genomeSize1)
+		b2 := bitset.Create(genomeSize2)
+
+		b1.ClearAll()
+		b2.SetAll()
 
 		g1, g2 := ga.NewGenome(b1), ga.NewGenome(b2)
 		c1, c2 := ga.TwoPointCrossover(&g1, &g2)
 
 		c1Bits, c2Bits := c1.GetBits(), c2.GetBits()
-
-		oneHasSize10 := (c1Bits.GetSize() == 10) || (c2Bits.GetSize() == 10)
+		oneHasSize10 := (c1Bits.Size() == uint(10)) || (c2Bits.Size() == uint(10))
 		t.Assert(oneHasSize10, IsTrue)
-		oneHasSize5 := (c1Bits.GetSize() == 5) || (c2Bits.GetSize() == 5)
+		oneHasSize5 := (c1Bits.Size() == uint(5)) || (c2Bits.Size() == uint(5))
 		t.Assert(oneHasSize5, IsTrue)
 	}
 
 	for i := 0; i < 100; i++ {
-		b1, b2 := ga.Bitset{}, ga.Bitset{}
-		genomeSize1 := 5
-		genomeSize2 := 10
-		b1.Create(genomeSize1)
-		b2.Create(genomeSize2)
-		b1.SetAll(0)
-		b2.SetAll(1)
+		genomeSize1 := uint(5)
+		genomeSize2 := uint(10)
+
+		b1 := bitset.Create(genomeSize1)
+		b2 := bitset.Create(genomeSize2)
+
+		b1.ClearAll()
+		b2.SetAll()
 
 		g1, g2 := ga.NewGenome(b1), ga.NewGenome(b2)
 		c1, c2 := ga.TwoPointCrossover(&g1, &g2)
 
 		c1Bits, c2Bits := c1.GetBits(), c2.GetBits()
-
-		oneHasSize10 := (c1Bits.GetSize() == 10) || (c2Bits.GetSize() == 10)
+		oneHasSize10 := (c1Bits.Size() == uint(10)) || (c2Bits.Size() == uint(10))
 		t.Assert(oneHasSize10, IsTrue)
-		oneHasSize5 := (c1Bits.GetSize() == 5) || (c2Bits.GetSize() == 5)
+		oneHasSize5 := (c1Bits.Size() == uint(5)) || (c2Bits.Size() == uint(5))
 		t.Assert(oneHasSize5, IsTrue)
 	}
 }
@@ -246,40 +249,42 @@ func (s *MaterSuite) TestShouldTwoPointCrossover_DifferentSizedBitsets(t *C) {
 func (s *MaterSuite) TestShouldUniformCrossover_DifferentSizedBitsets(t *C) {
 
 	for i := 0; i < 10; i++ {
-		b1, b2 := ga.Bitset{}, ga.Bitset{}
-		genomeSize1 := 20
-		genomeSize2 := 10
-		b1.Create(genomeSize1)
-		b2.Create(genomeSize2)
-		b1.SetAll(0)
-		b2.SetAll(1)
+		genomeSize1 := uint(20)
+		genomeSize2 := uint(10)
+
+		b1 := bitset.Create(genomeSize1)
+		b2 := bitset.Create(genomeSize2)
+
+		b1.ClearAll()
+		b2.SetAll()
 
 		g1, g2 := ga.NewGenome(b1), ga.NewGenome(b2)
 		c1, c2 := ga.UniformCrossover(&g1, &g2)
 
 		c1Bits, c2Bits := c1.GetBits(), c2.GetBits()
-		oneSizedGenomeSize1 := (c1Bits.GetSize() == genomeSize1) || (c2Bits.GetSize() == genomeSize1)
+		oneSizedGenomeSize1 := (c1Bits.Size() == genomeSize1) || (c2Bits.Size() == genomeSize1)
 		t.Assert(oneSizedGenomeSize1, IsTrue)
-		oneSizedGenomeSize2 := (c1Bits.GetSize() == genomeSize2) || (c2Bits.GetSize() == genomeSize2)
+		oneSizedGenomeSize2 := (c1Bits.Size() == genomeSize2) || (c2Bits.Size() == genomeSize2)
 		t.Assert(oneSizedGenomeSize2, IsTrue)
 	}
 
 	for i := 0; i < 10; i++ {
-		b1, b2 := ga.Bitset{}, ga.Bitset{}
-		genomeSize1 := 10
-		genomeSize2 := 20
-		b1.Create(genomeSize1)
-		b2.Create(genomeSize2)
-		b1.SetAll(0)
-		b2.SetAll(1)
+		genomeSize1 := uint(10)
+		genomeSize2 := uint(20)
+
+		b1 := bitset.Create(genomeSize1)
+		b2 := bitset.Create(genomeSize2)
+
+		b1.ClearAll()
+		b2.SetAll()
 
 		g1, g2 := ga.NewGenome(b1), ga.NewGenome(b2)
 		c1, c2 := ga.UniformCrossover(&g1, &g2)
 
 		c1Bits, c2Bits := c1.GetBits(), c2.GetBits()
-		oneSizedGenomeSize1 := (c1Bits.GetSize() == genomeSize1) || (c2Bits.GetSize() == genomeSize1)
+		oneSizedGenomeSize1 := (c1Bits.Size() == genomeSize1) || (c2Bits.Size() == genomeSize1)
 		t.Assert(oneSizedGenomeSize1, IsTrue)
-		oneSizedGenomeSize2 := (c1Bits.GetSize() == genomeSize2) || (c2Bits.GetSize() == genomeSize2)
+		oneSizedGenomeSize2 := (c1Bits.Size() == genomeSize2) || (c2Bits.Size() == genomeSize2)
 		t.Assert(oneSizedGenomeSize2, IsTrue)
 	}
 }
@@ -299,9 +304,8 @@ func (s *MaterSuite) TestShouldConfig_Single(t *C) {
 	)
 
 	numIterations := 100
-	b1, b2 := ga.Bitset{}, ga.Bitset{}
-	b1.Create(10)
-	b2.Create(10)
+	b1 := bitset.Create(10)
+	b2 := bitset.Create(10)
 	for i := 0; i < numIterations; i++ {
 		g1, g2 := ga.NewGenome(b1), ga.NewGenome(b2)
 		m.Go(&g1, &g2)
@@ -332,9 +336,8 @@ func (s *MaterSuite) TestShouldConfig_Multiple(t *C) {
 		)
 
 		numIterations := 1000
-		b1, b2 := ga.Bitset{}, ga.Bitset{}
-		b1.Create(10)
-		b2.Create(10)
+		b1 := bitset.Create(10)
+		b2 := bitset.Create(10)
 		for i := 0; i < numIterations; i++ {
 			g1, g2 := ga.NewGenome(b1), ga.NewGenome(b2)
 			m.Go(&g1, &g2)
@@ -351,11 +354,10 @@ func (s *MaterSuite) TestShouldConfig_Multiple(t *C) {
 
 func (s *MaterSuite) TestShouldMutate(t *C) {
 
-	genomeSize := 10
+	genomeSize := uint(10)
 	for i := 0; i < 100; i++ {
-		b1 := ga.Bitset{}
-		b1.Create(genomeSize)
-		b1.SetAll(0)
+		b1 := bitset.Create(genomeSize)
+		b1.ClearAll()
 
 		g1, g2 := ga.NewGenome(b1), ga.NewGenome(b1)
 		c1, c2 := ga.Mutate(&g1, &g2)
@@ -367,7 +369,7 @@ func (s *MaterSuite) TestShouldMutate(t *C) {
 		differringPointsC1 := 0
 		differringPointsC2 := 0
 		c1Bits, c2Bits := c1.GetBits(), c2.GetBits()
-		for i := 0; i < genomeSize; i++ {
+		for i := uint(0); i < genomeSize; i++ {
 			if c1Bits.Get(i) != b1.Get(i) {
 				differringPointsC1++
 			}
@@ -384,7 +386,7 @@ func (s *MaterSuite) TestShouldMutate(t *C) {
 
 func (s *MaterSuite) TestShouldUseEliteFromConfigSettings(t *C) {
 
-	elite := ga.NewGenome(ga.Bitset{})
+	elite := ga.NewGenome(bitset.Create(0))
 	myFunc := func(a, b *ga.Genome) (ga.Genome, ga.Genome) {
 		t.Assert(b, Equals, &elite)
 		return *a, *b
@@ -398,6 +400,7 @@ func (s *MaterSuite) TestShouldUseEliteFromConfigSettings(t *C) {
 
 	m.OnElite(&elite)
 
-	g1, g2 := ga.NewGenome(ga.Bitset{}), ga.NewGenome(ga.Bitset{})
+	g1 := ga.NewGenome(bitset.Create(0))
+	g2 := ga.NewGenome(bitset.Create(0))
 	m.Go(&g1, &g2)
 }

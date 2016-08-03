@@ -1,8 +1,10 @@
 package ga
 
+import "github.com/tomcraven/bitset"
+
 // BitsetCreate - an interface to a bitset create struct
 type BitsetCreate interface {
-	Go() Bitset
+	Go() bitset.Bitset
 }
 
 // NullBitsetCreate - a null implementation of the BitsetCreate interface
@@ -10,6 +12,6 @@ type NullBitsetCreate struct {
 }
 
 // Go returns a bitset with no content
-func (ngc *NullBitsetCreate) Go() Bitset {
-	return Bitset{}
+func (ngc *NullBitsetCreate) Go() bitset.Bitset {
+	return bitset.Create(0)
 }

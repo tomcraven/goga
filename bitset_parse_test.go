@@ -1,9 +1,11 @@
 package ga_test
 
 import (
-	"github.com/tomcraven/goga"
-	. "gopkg.in/check.v1"
 	"math/rand"
+
+	"github.com/tomcraven/bitset"
+	ga "github.com/tomcraven/goga"
+	. "gopkg.in/check.v1"
 )
 
 type BitsetParseSuite struct {
@@ -24,85 +26,80 @@ func (s *BitsetParseSuite) TestShouldInstantiate(t *C) {
 }
 
 func (s *BitsetParseSuite) TestShouldSetFormat(t *C) {
-	s.bp.SetFormat([]int{1, 2, 3, 4, 5})
+	s.bp.SetFormat([]uint{1, 2, 3, 4, 5})
 }
 
 func (s *BitsetParseSuite) TestShouldPanicWithMismatchedFormatAndBitsetSize(t *C) {
-	inputFormat := []int{
+	inputFormat := []uint{
 		1, 5, 3, 9, 10, 1,
 	}
 	s.bp.SetFormat(inputFormat)
 
-	inputBitset := ga.Bitset{}
-	inputBitset.Create(1) // Size should equal sum of all formats
+	inputBitset := bitset.Create(1)
 
-	t.Assert(func() { s.bp.Process(&inputBitset) }, Panics, "Input format does not match bitset size")
+	t.Assert(func() { s.bp.Process(inputBitset) }, Panics, "Input format does not match bitset size")
 }
 
 func (s *BitsetParseSuite) TestShouldNotPanicWithCorrectFormatAndBitsetSize(t *C) {
-	inputFormat := []int{
-		rand.Intn(10),
-		rand.Intn(10),
-		rand.Intn(10),
-		rand.Intn(10),
-		rand.Intn(10),
-		rand.Intn(10),
+	inputFormat := []uint{
+		uint(rand.Intn(10)),
+		uint(rand.Intn(10)),
+		uint(rand.Intn(10)),
+		uint(rand.Intn(10)),
+		uint(rand.Intn(10)),
+		uint(rand.Intn(10)),
 	}
 	s.bp.SetFormat(inputFormat)
 
-	bitsetSize := 0
+	bitsetSize := uint(0)
 	for _, i := range inputFormat {
 		bitsetSize += i
 	}
 
-	inputBitset := ga.Bitset{}
-	inputBitset.Create(bitsetSize) // Size should equal sum of all formats
-
-	s.bp.Process(&inputBitset)
+	inputBitset := bitset.Create(bitsetSize)
+	s.bp.Process(inputBitset)
 }
 
 func (s *BitsetParseSuite) TestShouldProcessSingleFormat(t *C) {
-	inputFormat := []int{
+	inputFormat := []uint{
 		16,
 	}
 
 	s.bp.SetFormat(inputFormat)
 
-	inputBitset := ga.Bitset{}
-	inputBitset.Create(16)
-	for i := 0; i < 16; i++ {
-		inputBitset.Set(i, 1)
+	inputBitset := bitset.Create(16)
+	for i := uint(0); i < 16; i++ {
+		inputBitset.Set(i)
 	}
-	t.Assert(s.bp.Process(&inputBitset), DeepEquals, []uint64{65535})
+	t.Assert(s.bp.Process(inputBitset), DeepEquals, []uint64{65535})
 
-	for i := 0; i < 16; i++ {
-		inputBitset.Set(i, 0)
+	for i := uint(0); i < 16; i++ {
+		inputBitset.Clear(i)
 	}
-	t.Assert(s.bp.Process(&inputBitset), DeepEquals, []uint64{0})
+	t.Assert(s.bp.Process(inputBitset), DeepEquals, []uint64{0})
 }
 
 func (s *BitsetParseSuite) TestShouldProcessMultipleFormat(t *C) {
-	inputFormat := []int{
+	inputFormat := []uint{
 		8, 8,
 	}
 
 	s.bp.SetFormat(inputFormat)
 
-	inputBitset := ga.Bitset{}
-	inputBitset.Create(16)
-	for i := 0; i < 8; i++ {
-		inputBitset.Set(i, 1)
+	inputBitset := bitset.Create(16)
+	for i := uint(0); i < 8; i++ {
+		inputBitset.Set(i)
 	}
-	for i := 8; i < 16; i++ {
-		inputBitset.Set(i, 0)
+	for i := uint(8); i < 16; i++ {
+		inputBitset.Clear(i)
 	}
-	t.Assert(s.bp.Process(&inputBitset), DeepEquals, []uint64{255, 0})
+	t.Assert(s.bp.Process(inputBitset), DeepEquals, []uint64{255, 0})
 
-	for i := 0; i < 8; i++ {
-		inputBitset.Set(i, 0)
+	for i := uint(0); i < 8; i++ {
+		inputBitset.Clear(i)
 	}
-	for i := 8; i < 16; i++ {
-		inputBitset.Set(i, 1)
+	for i := uint(8); i < 16; i++ {
+		inputBitset.Set(i)
 	}
-	t.Assert(s.bp.Process(&inputBitset), DeepEquals, []uint64{0, 255})
+	t.Assert(s.bp.Process(inputBitset), DeepEquals, []uint64{0, 255})
 }

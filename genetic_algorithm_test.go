@@ -3,11 +3,12 @@ package ga_test
 import (
 	. "gopkg.in/check.v1"
 
-	"github.com/tomcraven/goga"
-	// "fmt"
 	"math/rand"
 	"sync"
 	"time"
+
+	"github.com/tomcraven/bitset"
+	ga "github.com/tomcraven/goga"
 )
 
 const kNumThreads = 4
@@ -204,7 +205,7 @@ func (s *GeneticAlgorithmSuite) TestShouldGetPopulation(t *C) {
 	pop := genAlgo.GetPopulation()
 	t.Assert(pop, HasLen, 1)
 
-	g := ga.NewGenome(ga.Bitset{})
+	g := ga.NewGenome(bitset.Create(0))
 	t.Assert(pop[0], FitsTypeOf, g)
 
 	genAlgo.Init(123, kNumThreads)
@@ -486,9 +487,9 @@ type MyBitsetCreateCounter struct {
 	NumCalls int
 }
 
-func (gc *MyBitsetCreateCounter) Go() ga.Bitset {
+func (gc *MyBitsetCreateCounter) Go() bitset.Bitset {
 	gc.NumCalls++
-	return ga.Bitset{}
+	return bitset.Create(0)
 }
 
 func (s *GeneticAlgorithmSuite) TestShouldCallIntoBitsetCreate(t *C) {
@@ -510,8 +511,8 @@ type MyMaterPassCache2 struct {
 }
 
 func (ms *MyMaterPassCache2) Go(a, b *ga.Genome) (ga.Genome, ga.Genome) {
-
-	g1, g2 := ga.NewGenome(ga.Bitset{}), ga.NewGenome(ga.Bitset{})
+	g1 := ga.NewGenome(bitset.Create(0))
+	g2 := ga.NewGenome(bitset.Create(0))
 
 	ms.PassedGenomes = append(ms.PassedGenomes, g1)
 	ms.PassedGenomes = append(ms.PassedGenomes, g2)

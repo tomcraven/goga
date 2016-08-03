@@ -1,20 +1,22 @@
 package ga
 
+import "github.com/tomcraven/bitset"
+
 // Genome associates a fitness with a bitset
 type Genome interface {
 	GetFitness() int
 	SetFitness(int)
-	GetBits() *Bitset
+	GetBits() bitset.Bitset
 }
 
 type genome struct {
 	fitness int
-	bitset  Bitset
+	bitset  bitset.Bitset
 }
 
 // NewGenome creates a genome with a bitset and
 // a zero'd fitness score
-func NewGenome(bitset Bitset) Genome {
+func NewGenome(bitset bitset.Bitset) Genome {
 	return &genome{bitset: bitset}
 }
 
@@ -26,6 +28,6 @@ func (g *genome) SetFitness(fitness int) {
 	g.fitness = fitness
 }
 
-func (g *genome) GetBits() *Bitset {
-	return &g.bitset
+func (g *genome) GetBits() bitset.Bitset {
+	return g.bitset
 }

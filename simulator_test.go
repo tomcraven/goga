@@ -1,17 +1,17 @@
 package ga_test
 
-import (
-	"github.com/tomcraven/goga"
-	. "gopkg.in/check.v1"
-)
+import . "gopkg.in/check.v1"
+import ga "github.com/tomcraven/goga"
+import "github.com/tomcraven/bitset"
 
 type FakeSimulator struct {
 	OnBeginSimulationCalls int
-	SimulateCalls int
-	OnEndSimulationCalls int
-	ExitFuncCalls int
-	ExitFuncRet bool
+	SimulateCalls          int
+	OnEndSimulationCalls   int
+	ExitFuncCalls          int
+	ExitFuncRet            bool
 }
+
 func (fs *FakeSimulator) Reset() {
 	fs.OnBeginSimulationCalls = 0
 	fs.SimulateCalls = 0
@@ -44,7 +44,7 @@ var _ = Suite(&SimulatorTestSuite{})
 
 func (s *SimulatorTestSuite) TestShouldReturnFalseFromExitFunctionFromNullSimulator(t *C) {
 	nullSimulator := ga.NullSimulator{}
-	genome := ga.NewGenome(ga.Bitset{})
+	genome := ga.NewGenome(bitset.Create(0))
 	t.Assert(nullSimulator.ExitFunc(&genome), IsFalse)
 }
 
@@ -53,7 +53,7 @@ func (s *SimulatorTestSuite) TestSimulatorSwitch_OnBeginSimulation(t *C) {
 	fs2 := FakeSimulator{}
 	fs1.Reset()
 	fs2.Reset()
-	ss := ga.SimulatorSwitch {
+	ss := ga.SimulatorSwitch{
 		Simulators: []ga.Simulator{
 			&fs1, &fs2,
 		},
@@ -69,7 +69,7 @@ func (s *SimulatorTestSuite) TestSimulatorSwitch_Simulate(t *C) {
 	fs2 := FakeSimulator{}
 	fs1.Reset()
 	fs2.Reset()
-	ss := ga.SimulatorSwitch {
+	ss := ga.SimulatorSwitch{
 		Simulators: []ga.Simulator{
 			&fs1, &fs2,
 		},
@@ -85,7 +85,7 @@ func (s *SimulatorTestSuite) TestSimulatorSwitch_OnEndSimulation(t *C) {
 	fs2 := FakeSimulator{}
 	fs1.Reset()
 	fs2.Reset()
-	ss := ga.SimulatorSwitch {
+	ss := ga.SimulatorSwitch{
 		Simulators: []ga.Simulator{
 			&fs1, &fs2,
 		},
@@ -101,7 +101,7 @@ func (s *SimulatorTestSuite) TestSimulatorSwitch_OnExitFunc(t *C) {
 	fs2 := FakeSimulator{}
 	fs1.Reset()
 	fs2.Reset()
-	ss := ga.SimulatorSwitch {
+	ss := ga.SimulatorSwitch{
 		Simulators: []ga.Simulator{
 			&fs1, &fs2,
 		},

@@ -1,15 +1,17 @@
 package ga
 
+import "github.com/tomcraven/bitset"
+
 // IBitsetParse - an interface to an object that is able
 // to parse a bitset into an array of uint64s
 type IBitsetParse interface {
-	SetFormat([]int)
-	Process(*Bitset) []uint64
+	SetFormat([]uint)
+	Process(bitset.Bitset) []uint64
 }
 
 type bitsetParse struct {
-	expectedBitsetSize int
-	format             []int
+	expectedBitsetSize uint
+	format             []uint
 }
 
 // CreateBitsetParse returns an instance of a bitset parser
@@ -17,7 +19,7 @@ func CreateBitsetParse() IBitsetParse {
 	return &bitsetParse{}
 }
 
-func (bp *bitsetParse) SetFormat(format []int) {
+func (bp *bitsetParse) SetFormat(format []uint) {
 	bp.expectedBitsetSize = 0
 	for _, i := range format {
 		bp.expectedBitsetSize += i
@@ -25,18 +27,18 @@ func (bp *bitsetParse) SetFormat(format []int) {
 	bp.format = format
 }
 
-func (bp *bitsetParse) Process(bitset *Bitset) []uint64 {
-	if bitset.GetSize() != bp.expectedBitsetSize {
+func (bp *bitsetParse) Process(bitset bitset.Bitset) []uint64 {
+	if bitset.Size() != bp.expectedBitsetSize {
 		panic("Input format does not match bitset size")
 	}
 
 	ret := make([]uint64, len(bp.format))
-	runningBits := 0
+	runningBits := uint(0)
 	for retIndex, numBits := range bp.format {
 		ret[retIndex] = 0
 
-		for i := 0; i < numBits; i++ {
-			if bitset.Get(i+runningBits) == 1 {
+		for i := uint(0); i < numBits; i++ {
+			if bitset.Get(i + runningBits) {
 				ret[retIndex] |= (1 << uint(i))
 			}
 		}

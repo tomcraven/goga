@@ -3,9 +3,10 @@ package ga_test
 import (
 	. "gopkg.in/check.v1"
 
-	"github.com/tomcraven/goga"
 	"math"
-	// "fmt"
+
+	"github.com/tomcraven/bitset"
+	ga "github.com/tomcraven/goga"
 )
 
 type SelectorSuite struct {
@@ -25,7 +26,7 @@ func (s *SelectorSuite) TestShouldRoulette(t *C) {
 	// 	genomeArray := make( []ga.Genome, numGenomes )
 	// 	totalFitness := 0
 	// 	for i := 0; i < numGenomes; i++ {
-	// 		genomeArray[i] = ga.NewGenome( ga.Bitset{} )
+	// 		genomeArray[i] = ga.NewGenome( bitset.Create(0) )
 	// 		genomeArray[i].SetFitness( i )
 	// 		totalFitness += i
 	// 	}
@@ -54,7 +55,7 @@ func (s *SelectorSuite) TestShouldRouletteWhenTotalFitnessIs0(t *C) {
 	numGenomes := 10
 	genomeArray := make([]ga.Genome, numGenomes)
 	for i := 0; i < numGenomes; i++ {
-		genomeArray[i] = ga.NewGenome(ga.Bitset{})
+		genomeArray[i] = ga.NewGenome(bitset.Create(0))
 		genomeArray[i].SetFitness(i)
 	}
 
@@ -65,7 +66,7 @@ func (s *SelectorSuite) TestShouldPanicWithMismatchedFitness(t *C) {
 	numGenomes := 10
 	genomeArray := make([]ga.Genome, numGenomes)
 	for i := 0; i < numGenomes; i++ {
-		genomeArray[i] = ga.NewGenome(ga.Bitset{})
+		genomeArray[i] = ga.NewGenome(bitset.Create(0))
 		genomeArray[i].SetFitness(1)
 	}
 
@@ -84,7 +85,7 @@ func (s *SelectorSuite) TestShouldPassBackGenomeFromGenomeArray(t *C) {
 	genomeArray := make([]ga.Genome, numGenomes)
 
 	for i := range genomeArray {
-		genomeArray[i] = ga.NewGenome(ga.Bitset{})
+		genomeArray[i] = ga.NewGenome(bitset.Create(0))
 		genomeArray[i].SetFitness(1)
 	}
 

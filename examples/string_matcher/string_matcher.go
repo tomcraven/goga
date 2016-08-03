@@ -39,7 +39,7 @@ type myBitsetCreate struct {
 }
 
 func (bc *myBitsetCreate) Go() ga.Bitset {
-	b := ga.Bitset{}
+	b := bitset.Create(0)
 	b.Create(targetLength)
 	for i := 0; i < targetLength; i++ {
 		b.Set(i, rand.Intn(2))
