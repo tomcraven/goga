@@ -242,7 +242,7 @@ func UniformCrossover(g1, g2 *Genome) (Genome, Genome) {
 func Mutate(g1, g2 *Genome) (Genome, Genome) {
 
 	g1BitsOrig := (*g1).GetBits()
-	g1Bits := g1BitsOrig.CreateCopy()
+	g1Bits := g1BitsOrig.Clone()
 	randomBit := uint(rand.Intn(int(g1Bits.Size())))
 	g1Bits.SetTo(randomBit, !g1Bits.Get(randomBit))
 

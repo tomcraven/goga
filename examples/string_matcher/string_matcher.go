@@ -7,6 +7,7 @@ import (
 	"runtime"
 	"time"
 
+	"github.com/tomcraven/bitset"
 	ga "github.com/tomcraven/goga"
 )
 
@@ -18,31 +19,45 @@ func (sms *stringMaterSimulator) OnBeginSimulation() {
 func (sms *stringMaterSimulator) OnEndSimulation() {
 }
 func (sms *stringMaterSimulator) Simulate(g *ga.Genome) {
+	sms.simulateScoreCharacters(g)
+}
+func (sms *stringMaterSimulator) simulateScoreCharacters(g *ga.Genome) {
+	bits := (*g).GetBits()
+	for i, targetCharacter := range targetString {
+		var evolvedCharacter uint8
+		beginIndex := uint(i * 8)
+		bits.Slice(beginIndex, beginIndex+8).BuildUint8(&evolvedCharacter)
+
+		if targetCharacter == rune(evolvedCharacter) {
+			(*g).SetFitness((*g).GetFitness() + 1)
+		}
+	}
+}
+func (sms *stringMaterSimulator) simulateScoreBits(g *ga.Genome) {
 	bits := (*g).GetBits()
 	for i, character := range targetString {
 		for j := 0; j < 8; j++ {
 			targetBit := character & (1 << uint(j))
-			bit := bits.Get((i * 8) + j)
-			if targetBit != 0 && bit == 1 {
+			set := bits.Get(uint((i * 8) + j))
+			if targetBit != 0 && set {
 				(*g).SetFitness((*g).GetFitness() + 1)
-			} else if targetBit == 0 && bit == 0 {
+			} else if targetBit == 0 && !set {
 				(*g).SetFitness((*g).GetFitness() + 1)
 			}
 		}
 	}
 }
 func (sms *stringMaterSimulator) ExitFunc(g *ga.Genome) bool {
-	return (*g).GetFitness() == targetLength
+	return (*g).GetFitness() == (len(targetString) * 8)
 }
 
 type myBitsetCreate struct {
 }
 
-func (bc *myBitsetCreate) Go() ga.Bitset {
-	b := bitset.Create(0)
-	b.Create(targetLength)
-	for i := 0; i < targetLength; i++ {
-		b.Set(i, rand.Intn(2))
+func (bc *myBitsetCreate) Go() bitset.Bitset {
+	b := bitset.Create(targetLength)
+	for i := uint(0); i < targetLength; i++ {
+		b.SetTo(i, rand.Intn(2) == 0)
 	}
 	return b
 }
@@ -55,11 +70,11 @@ func (ec *myEliteConsumer) OnElite(g *ga.Genome) {
 	gBits := (*g).GetBits()
 	ec.currentIter++
 	var genomeString string
-	for i := 0; i < gBits.GetSize(); i += 8 {
+	for i := uint(0); i < gBits.Size(); i += 8 {
 		c := int(0)
-		for j := 0; j < 8; j++ {
+		for j := uint(0); j < 8; j++ {
 			bit := gBits.Get(i + j)
-			if bit != 0 {
+			if bit {
 				c |= 1 << uint(j)
 			}
 		}
@@ -75,14 +90,14 @@ const (
 
 var (
 	targetString = "abcdefghijklmnopqrstuvwxyz"
-	targetLength int
+	targetLength uint
 )
 
 func init() {
 	if len(os.Args) > 1 {
 		targetString = os.Args[1]
 	}
-	targetLength = len(targetString) * 8
+	targetLength = uint(len(targetString) * 8)
 }
 
 func main() {
