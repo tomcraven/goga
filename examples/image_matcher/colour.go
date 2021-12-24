@@ -5,6 +5,8 @@ import (
 	"image/color"
 	"image/draw"
 	"math"
+
+	"github.com/tomcraven/goga"
 )
 
 func createImageFromBitset(bits *goga.Bitset) draw.Image {

@@ -12,11 +12,11 @@ import (
 // * Simulator - a simulation component used to score each genome in each generation
 // * BitsetCreate - used to create the initial population of genomes
 type GeneticAlgorithm struct {
-	Mater         IMater
-	EliteConsumer IEliteConsumer
-	Simulator     ISimulator
-	Selector      ISelector
-	BitsetCreate  IBitsetCreate
+	Mater         Mater
+	EliteConsumer EliteConsumer
+	Simulator     Simulator
+	Selector      Selector
+	BitsetCreate  BitsetCreate
 
 	populationSize          int
 	population              []Genome
@@ -66,7 +66,7 @@ func (ga *GeneticAlgorithm) beginSimulation() {
 	// todo: make configurable
 	for i := 0; i < ga.parallelSimulations; i++ {
 		go func(genomeSimulationChannel chan Genome,
-			waitGroup *sync.WaitGroup, simulator ISimulator) {
+			waitGroup *sync.WaitGroup, simulator Simulator) {
 
 			for genome := range genomeSimulationChannel {
 				defer waitGroup.Done()

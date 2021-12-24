@@ -9,7 +9,7 @@ import (
 )
 
 type SelectorSuite struct {
-	selector goga.ISelector
+	selector goga.Selector
 }
 
 var _ = Suite(&SelectorSuite{})

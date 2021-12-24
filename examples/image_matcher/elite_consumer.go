@@ -9,6 +9,8 @@ import (
 	"image/png"
 	"os"
 	"time"
+
+	"github.com/tomcraven/goga"
 )
 
 type myEliteConsumer struct {
@@ -17,7 +19,7 @@ type myEliteConsumer struct {
 }
 
 func (ec *myEliteConsumer) OnElite(g goga.Genome) {
-	bits := (*g).GetBits()
+	bits := g.GetBits()
 	newImage := createImageFromBitset(bits)
 
 	// Output elite
@@ -35,7 +37,7 @@ func (ec *myEliteConsumer) OnElite(g goga.Genome) {
 	outputImageFileAlphaBlended.Close()
 
 	ec.currentIter++
-	fitness := (*g).GetFitness()
+	fitness := g.GetFitness()
 	fmt.Println(ec.currentIter, "\t", fitness, "\t", fitness-ec.previousFitness)
 
 	ec.previousFitness = fitness

@@ -7,7 +7,7 @@ import (
 )
 
 type MaterSuite struct {
-	mater goga.IMater
+	mater goga.Mater
 }
 
 func (s *MaterSuite) SetUpTest(t *C) {

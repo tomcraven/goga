@@ -1,7 +1,7 @@
 package goga
 
-// IBitsetCreate - an interface to a bitset create struct
-type IBitsetCreate interface {
+// BitsetCreate - an interface to a bitset create struct
+type BitsetCreate interface {
 	Go() Bitset
 }
 

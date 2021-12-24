@@ -8,7 +8,7 @@ import (
 )
 
 type BitsetParseSuite struct {
-	bp goga.IBitsetParse
+	bp goga.BitsetParse
 }
 
 func (s *BitsetParseSuite) SetUpTest(t *C) {

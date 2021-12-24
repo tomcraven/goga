@@ -4,8 +4,8 @@ import (
 	"math/rand"
 )
 
-// IMater - an interface to a mater object
-type IMater interface {
+// Mater - an interface to a mater object
+type Mater interface {
 	Go(Genome, Genome) (Genome, Genome)
 	OnElite(Genome)
 }
@@ -40,7 +40,7 @@ type mater struct {
 }
 
 // NewMater returns an instance of an IMater with several MaterFuncProbabilities
-func NewMater(materConfig []MaterFunctionProbability) IMater {
+func NewMater(materConfig []MaterFunctionProbability) Mater {
 	return &mater{
 		materConfig: materConfig,
 	}

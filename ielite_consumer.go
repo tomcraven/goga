@@ -1,7 +1,7 @@
 package goga
 
-// IEliteConsumer - an interface to the elite consumer
-type IEliteConsumer interface {
+// EliteConsumer - an interface to the elite consumer
+type EliteConsumer interface {
 	OnElite(Genome)
 }
 

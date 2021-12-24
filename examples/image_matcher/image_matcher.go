@@ -8,6 +8,8 @@ import (
 	"os"
 	"runtime"
 	"time"
+
+	"github.com/tomcraven/goga"
 )
 
 const (
@@ -37,7 +39,7 @@ func (simulator *imageMatcherSimulator) OnEndSimulation() {
 	simulator.totalIterations++
 }
 func (simulator *imageMatcherSimulator) Simulate(g goga.Genome) {
-	bits := (*g).GetBits()
+	bits := g.GetBits()
 	newImage := createImageFromBitset(bits)
 
 	inputImageBounds := inputImage.Bounds()
@@ -52,7 +54,7 @@ func (simulator *imageMatcherSimulator) Simulate(g goga.Genome) {
 		}
 	}
 
-	(*g).SetFitness(int(fitness))
+	g.SetFitness(int(fitness))
 }
 func (simulator *imageMatcherSimulator) ExitFunc(g goga.Genome) bool {
 	return simulator.totalIterations >= maxIterations
@@ -76,8 +78,8 @@ var (
 
 	inputImage image.Image
 
-	circleBitsetFormat goga.IBitsetParse
-	rectBitsetFormat   goga.IBitsetParse
+	circleBitsetFormat goga.BitsetParse
+	rectBitsetFormat   goga.BitsetParse
 )
 
 func init() {

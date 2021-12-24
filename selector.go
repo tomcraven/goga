@@ -4,8 +4,8 @@ import (
 	"math/rand"
 )
 
-// ISelector - a selector interface used to pick 2 genomes to mate
-type ISelector interface {
+// Selector - a selector interface used to pick 2 genomes to mate
+type Selector interface {
 	Go([]Genome, int) Genome
 }
 
@@ -33,7 +33,7 @@ type selector struct {
 }
 
 // NewSelector returns an instance of an ISelector with several SelectorFunctionProbabiities
-func NewSelector(selectorConfig []SelectorFunctionProbability) ISelector {
+func NewSelector(selectorConfig []SelectorFunctionProbability) Selector {
 	return &selector{
 		selectorConfig: selectorConfig,
 	}

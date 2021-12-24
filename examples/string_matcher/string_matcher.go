@@ -6,6 +6,8 @@ import (
 	"os"
 	"runtime"
 	"time"
+
+	"github.com/tomcraven/goga"
 )
 
 type stringMaterSimulator struct {
@@ -16,21 +18,21 @@ func (sms *stringMaterSimulator) OnBeginSimulation() {
 func (sms *stringMaterSimulator) OnEndSimulation() {
 }
 func (sms *stringMaterSimulator) Simulate(g goga.Genome) {
-	bits := (*g).GetBits()
+	bits := g.GetBits()
 	for i, character := range targetString {
 		for j := 0; j < 8; j++ {
 			targetBit := character & (1 << uint(j))
 			bit := bits.Get((i * 8) + j)
 			if targetBit != 0 && bit == 1 {
-				(*g).SetFitness((*g).GetFitness() + 1)
+				g.SetFitness(g.GetFitness() + 1)
 			} else if targetBit == 0 && bit == 0 {
-				(*g).SetFitness((*g).GetFitness() + 1)
+				g.SetFitness(g.GetFitness() + 1)
 			}
 		}
 	}
 }
 func (sms *stringMaterSimulator) ExitFunc(g goga.Genome) bool {
-	return (*g).GetFitness() == targetLength
+	return g.GetFitness() == targetLength
 }
 
 type myBitsetCreate struct {
@@ -50,7 +52,7 @@ type myEliteConsumer struct {
 }
 
 func (ec *myEliteConsumer) OnElite(g goga.Genome) {
-	gBits := (*g).GetBits()
+	gBits := g.GetBits()
 	ec.currentIter++
 	var genomeString string
 	for i := 0; i < gBits.GetSize(); i += 8 {
@@ -64,7 +66,7 @@ func (ec *myEliteConsumer) OnElite(g goga.Genome) {
 		genomeString += string(c)
 	}
 
-	fmt.Println(ec.currentIter, "\t", genomeString, "\t", (*g).GetFitness())
+	fmt.Println(ec.currentIter, "\t", genomeString, "\t", g.GetFitness())
 }
 
 const (

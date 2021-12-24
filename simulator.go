@@ -1,7 +1,7 @@
 package goga
 
-// ISimulator - a Simulator interface
-type ISimulator interface {
+// Simulator - a Simulator interface
+type Simulator interface {
 	OnBeginSimulation()
 	Simulate(Genome)
 	OnEndSimulation()
