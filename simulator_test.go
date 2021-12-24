@@ -1,4 +1,4 @@
-package ga_test
+package goga_test
 
 import (
 	"github.com/tomcraven/goga"
@@ -16,7 +16,7 @@ func (s *SimulatorTestSuite) TearDownTest(t *C) {
 var _ = Suite(&SimulatorTestSuite{})
 
 func (s *SimulatorTestSuite) TestShouldReturnFalseFromExitFunctionFromNullSimulator(t *C) {
-	nullSimulator := ga.NullSimulator{}
-	genome := ga.NewGenome(ga.Bitset{})
-	t.Assert(nullSimulator.ExitFunc(&genome), IsFalse)
+	nullSimulator := goga.NullSimulator{}
+	genome := goga.NewGenome(goga.Bitset{})
+	t.Assert(nullSimulator.ExitFunc(genome), IsFalse)
 }

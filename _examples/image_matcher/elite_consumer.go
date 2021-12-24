@@ -1,14 +1,13 @@
 package main
 
 import (
-	ga "github.com/tomcraven/goga"
-	"os"
-	_ "image/jpeg"
-	"image/png"
-	"image/draw"
+	"fmt"
 	"image"
 	"image/color"
-	"fmt"
+	"image/draw"
+	_ "image/jpeg"
+	"image/png"
+	"os"
 	"time"
 )
 
@@ -17,7 +16,7 @@ type myEliteConsumer struct {
 	previousFitness int
 }
 
-func (ec *myEliteConsumer) OnElite(g *ga.IGenome) {
+func (ec *myEliteConsumer) OnElite(g goga.Genome) {
 	bits := (*g).GetBits()
 	newImage := createImageFromBitset(bits)
 

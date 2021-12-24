@@ -1,14 +1,13 @@
 package main
 
 import (
-	"math"
 	"image"
-	"image/draw"
 	"image/color"
-	ga "github.com/tomcraven/goga"
+	"image/draw"
+	"math"
 )
 
-func createImageFromBitset(bits *ga.Bitset) draw.Image {
+func createImageFromBitset(bits *goga.Bitset) draw.Image {
 	inputImageBounds := inputImage.Bounds()
 
 	newImage := image.NewRGBA(inputImageBounds)

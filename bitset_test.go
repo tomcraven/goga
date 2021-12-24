@@ -1,4 +1,4 @@
-package ga_test
+package goga_test
 
 import (
 	"github.com/tomcraven/goga"
@@ -6,11 +6,11 @@ import (
 )
 
 type BitsetSuite struct {
-	bitset *ga.Bitset
+	bitset *goga.Bitset
 }
 
 func (s *BitsetSuite) SetUpTest(t *C) {
-	s.bitset = &ga.Bitset{}
+	s.bitset = &goga.Bitset{}
 }
 func (s *BitsetSuite) TearDownTest(t *C) {
 	s.bitset = nil
@@ -32,7 +32,7 @@ func (s *BitsetSuite) TestShouldGetSize(t *C) {
 	s.bitset.Create(10)
 	t.Assert(10, Equals, s.bitset.GetSize())
 
-	b := ga.Bitset{}
+	b := goga.Bitset{}
 	b.Create(100)
 	t.Assert(100, Equals, b.GetSize())
 	t.Assert(b.Set(99, 1), IsTrue)
@@ -79,7 +79,7 @@ func (s *BitsetSuite) TestShouldSlice(t *C) {
 	s.bitset.SetAll(1)
 
 	slice := s.bitset.Slice(0, 3)
-	t.Assert(slice, FitsTypeOf, ga.Bitset{})
+	t.Assert(slice, FitsTypeOf, goga.Bitset{})
 	t.Assert(slice.GetSize(), Equals, 3)
 
 	for i := 0; i < 3; i++ {

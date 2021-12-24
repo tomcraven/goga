@@ -8,7 +8,6 @@ import (
 	"os"
 	"runtime"
 	"time"
-	ga "github.com/tomcraven/goga"
 )
 
 const (
@@ -37,7 +36,7 @@ func (simulator *imageMatcherSimulator) OnBeginSimulation() {
 func (simulator *imageMatcherSimulator) OnEndSimulation() {
 	simulator.totalIterations++
 }
-func (simulator *imageMatcherSimulator) Simulate(g *ga.IGenome) {
+func (simulator *imageMatcherSimulator) Simulate(g goga.Genome) {
 	bits := (*g).GetBits()
 	newImage := createImageFromBitset(bits)
 
@@ -55,15 +54,15 @@ func (simulator *imageMatcherSimulator) Simulate(g *ga.IGenome) {
 
 	(*g).SetFitness(int(fitness))
 }
-func (simulator *imageMatcherSimulator) ExitFunc(g *ga.IGenome) bool {
+func (simulator *imageMatcherSimulator) ExitFunc(g goga.Genome) bool {
 	return simulator.totalIterations >= maxIterations
 }
 
 type myBitsetCreate struct {
 }
 
-func (bc *myBitsetCreate) Go() ga.Bitset {
-	b := ga.Bitset{}
+func (bc *myBitsetCreate) Go() goga.Bitset {
+	b := goga.Bitset{}
 	b.Create(numShapes * largestShapeBits)
 	for i := 0; i < b.GetSize(); i++ {
 		b.Set(i, rand.Intn(2))
@@ -77,8 +76,8 @@ var (
 
 	inputImage image.Image
 
-	circleBitsetFormat ga.IBitsetParse
-	rectBitsetFormat   ga.IBitsetParse
+	circleBitsetFormat goga.IBitsetParse
+	rectBitsetFormat   goga.IBitsetParse
 )
 
 func init() {
@@ -106,42 +105,42 @@ func main() {
 	// Get the input image
 	inputImage = getImageFromFile(os.Args[1])
 
-	rectBitsetFormat = ga.CreateBitsetParse()
+	rectBitsetFormat = goga.CreateBitsetParse()
 	rectBitsetFormat.SetFormat([]int{
 		bitsPerCoordinateNumber, bitsPerCoordinateNumber, bitsPerCoordinateNumber, bitsPerCoordinateNumber,
 		bitsPerColourChannel, bitsPerColourChannel, bitsPerColourChannel, bitsPerColourChannel,
 	})
 
-	circleBitsetFormat = ga.CreateBitsetParse()
+	circleBitsetFormat = goga.CreateBitsetParse()
 	circleBitsetFormat.SetFormat([]int{
 		bitsPerCoordinateNumber, bitsPerCoordinateNumber, bitsPerCoordinateNumber,
 		bitsPerColourChannel, bitsPerColourChannel, bitsPerColourChannel, bitsPerColourChannel,
 	})
 
-	genAlgo := ga.NewGeneticAlgorithm()
+	genAlgo := goga.NewGeneticAlgorithm()
 	genAlgo.Simulator = &imageMatcherSimulator{}
 	genAlgo.BitsetCreate = &myBitsetCreate{}
 	genAlgo.EliteConsumer = &myEliteConsumer{}
-	genAlgo.Mater = ga.NewMater(
-		[]ga.MaterFunctionProbability{
-			{P: 1.0, F: ga.UniformCrossover, UseElite: true},
-			{P: 1.0, F: ga.Mutate},
-			{P: 1.0, F: ga.Mutate},
-			{P: 1.0, F: ga.Mutate},
-			{P: 1.0, F: ga.Mutate},
-			{P: 1.0, F: ga.Mutate},
-			{P: 1.0, F: ga.Mutate},
-			{P: 1.0, F: ga.Mutate},
-			{P: 1.0, F: ga.Mutate},
-			{P: 1.0, F: ga.Mutate},
-			{P: 1.0, F: ga.Mutate},
-			{P: 1.0, F: ga.Mutate},
-			{P: 1.0, F: ga.Mutate},
+	genAlgo.Mater = goga.NewMater(
+		[]goga.MaterFunctionProbability{
+			{P: 1.0, F: goga.UniformCrossover, UseElite: true},
+			{P: 1.0, F: goga.Mutate},
+			{P: 1.0, F: goga.Mutate},
+			{P: 1.0, F: goga.Mutate},
+			{P: 1.0, F: goga.Mutate},
+			{P: 1.0, F: goga.Mutate},
+			{P: 1.0, F: goga.Mutate},
+			{P: 1.0, F: goga.Mutate},
+			{P: 1.0, F: goga.Mutate},
+			{P: 1.0, F: goga.Mutate},
+			{P: 1.0, F: goga.Mutate},
+			{P: 1.0, F: goga.Mutate},
+			{P: 1.0, F: goga.Mutate},
 		},
 	)
-	genAlgo.Selector = ga.NewSelector(
-		[]ga.SelectorFunctionProbability{
-			{P: 1.0, F: ga.Roulette},
+	genAlgo.Selector = goga.NewSelector(
+		[]goga.SelectorFunctionProbability{
+			{P: 1.0, F: goga.Roulette},
 		},
 	)
 
