@@ -1,13 +1,13 @@
-package ga
+package goga
 
 import (
 	"math/rand"
 )
 
-// IMater - an interface to a mater object
-type IMater interface {
-	Go(*IGenome, *IGenome) (IGenome, IGenome)
-	OnElite(*IGenome)
+// Mater - an interface to a mater object
+type Mater interface {
+	Go(Genome, Genome) (Genome, Genome)
+	OnElite(Genome)
 }
 
 // NullMater - null implementation of the IMater interface
@@ -15,12 +15,12 @@ type NullMater struct {
 }
 
 // Go - null implementation of the IMater go func
-func (nm *NullMater) Go(a, b *IGenome) (IGenome, IGenome) {
-	return NewGenome(*(*a).GetBits()), NewGenome(*(*b).GetBits())
+func (nm *NullMater) Go(a, b Genome) (Genome, Genome) {
+	return NewGenome(*a.GetBits()), NewGenome(*b.GetBits())
 }
 
 // OnElite - null implementation of the IMater OnElite func
-func (nm *NullMater) OnElite(a *IGenome) {
+func (nm *NullMater) OnElite(a Genome) {
 }
 
 // MaterFunctionProbability -
@@ -30,17 +30,17 @@ func (nm *NullMater) OnElite(a *IGenome) {
 // 0 = never called, 1 = called for every genome
 type MaterFunctionProbability struct {
 	P        float32
-	F        func(*IGenome, *IGenome) (IGenome, IGenome)
+	F        func(Genome, Genome) (Genome, Genome)
 	UseElite bool
 }
 
 type mater struct {
 	materConfig []MaterFunctionProbability
-	elite       *IGenome
+	elite       Genome
 }
 
 // NewMater returns an instance of an IMater with several MaterFuncProbabilities
-func NewMater(materConfig []MaterFunctionProbability) IMater {
+func NewMater(materConfig []MaterFunctionProbability) Mater {
 	return &mater{
 		materConfig: materConfig,
 	}
@@ -48,16 +48,16 @@ func NewMater(materConfig []MaterFunctionProbability) IMater {
 
 // Go cycles through, and applies, the configures mater functions in the
 // MaterFunctionProbability array
-func (m *mater) Go(g1, g2 *IGenome) (IGenome, IGenome) {
+func (m *mater) Go(g1, g2 Genome) (Genome, Genome) {
 
-	newG1 := NewGenome(*(*g1).GetBits())
-	newG2 := NewGenome(*(*g2).GetBits())
+	newG1 := NewGenome(*g1.GetBits())
+	newG2 := NewGenome(*g2.GetBits())
 	for _, config := range m.materConfig {
 		if rand.Float32() < config.P {
 			if config.UseElite {
-				newG1, newG2 = config.F(&newG1, m.elite)
+				newG1, newG2 = config.F(newG1, m.elite)
 			} else {
-				newG1, newG2 = config.F(&newG1, &newG2)
+				newG1, newG2 = config.F(newG1, newG2)
 			}
 		}
 	}
@@ -66,7 +66,7 @@ func (m *mater) Go(g1, g2 *IGenome) (IGenome, IGenome) {
 }
 
 // OnElite -
-func (m *mater) OnElite(elite *IGenome) {
+func (m *mater) OnElite(elite Genome) {
 	m.elite = elite
 }
 
@@ -91,9 +91,9 @@ func min(a, b int) int {
 // 000000 and 111111
 // could produce output genomes of:
 // 000111 and 111000
-func OnePointCrossover(g1, g2 *IGenome) (IGenome, IGenome) {
+func OnePointCrossover(g1, g2 Genome) (Genome, Genome) {
 
-	g1Bits, g2Bits := (*g1).GetBits(), (*g2).GetBits()
+	g1Bits, g2Bits := g1.GetBits(), g2.GetBits()
 
 	b1, b2 := Bitset{}, Bitset{}
 	g1Size := g1Bits.GetSize()
@@ -135,9 +135,9 @@ func OnePointCrossover(g1, g2 *IGenome) (IGenome, IGenome) {
 // 000000 and 111111
 // could produce output genomes of:
 // 001100 and 110011
-func TwoPointCrossover(g1, g2 *IGenome) (IGenome, IGenome) {
+func TwoPointCrossover(g1, g2 Genome) (Genome, Genome) {
 
-	g1Bits, g2Bits := (*g1).GetBits(), (*g2).GetBits()
+	g1Bits, g2Bits := g1.GetBits(), g2.GetBits()
 
 	b1, b2 := Bitset{}, Bitset{}
 	g1Size := g1Bits.GetSize()
@@ -193,9 +193,9 @@ func TwoPointCrossover(g1, g2 *IGenome) (IGenome, IGenome) {
 // 000000 and 111111
 // could produce output genomes of:
 // 101010 and 010101
-func UniformCrossover(g1, g2 *IGenome) (IGenome, IGenome) {
+func UniformCrossover(g1, g2 Genome) (Genome, Genome) {
 
-	g1Bits, g2Bits := (*g1).GetBits(), (*g2).GetBits()
+	g1Bits, g2Bits := g1.GetBits(), g2.GetBits()
 
 	b1, b2 := Bitset{}, Bitset{}
 	g1Size := g1Bits.GetSize()
@@ -237,12 +237,12 @@ func UniformCrossover(g1, g2 *IGenome) (IGenome, IGenome) {
 // 000000 and 111111
 // could produce output genomes of:
 // 001000 and 111111
-func Mutate(g1, g2 *IGenome) (IGenome, IGenome) {
+func Mutate(g1, g2 Genome) (Genome, Genome) {
 
-	g1BitsOrig := (*g1).GetBits()
+	g1BitsOrig := g1.GetBits()
 	g1Bits := g1BitsOrig.CreateCopy()
 	randomBit := rand.Intn(g1Bits.GetSize())
 	g1Bits.Set(randomBit, 1-g1Bits.Get(randomBit))
 
-	return NewGenome(g1Bits), NewGenome(*(*g2).GetBits())
+	return NewGenome(g1Bits), NewGenome(*g2.GetBits())
 }

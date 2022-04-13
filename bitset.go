@@ -1,4 +1,4 @@
-package ga
+package goga
 
 // Bitset - a simple bitset implementation
 type Bitset struct {

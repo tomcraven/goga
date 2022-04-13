@@ -1,18 +1,17 @@
-package ga_test
+package goga_test
 
 import (
 	. "gopkg.in/check.v1"
-
-	"github.com/tomcraven/goga"
 	// "fmt"
+	"github.com/tomcraven/goga"
 )
 
 type MaterSuite struct {
-	mater ga.IMater
+	mater goga.Mater
 }
 
 func (s *MaterSuite) SetUpTest(t *C) {
-	s.mater = ga.NewMater([]ga.MaterFunctionProbability{})
+	s.mater = goga.NewMater([]goga.MaterFunctionProbability{})
 }
 func (s *MaterSuite) TearDownTest(t *C) {
 	s.mater = nil
@@ -25,24 +24,24 @@ func (s *MaterSuite) TestShouldInstantiate(t *C) {
 }
 
 func (s *MaterSuite) TestGoShouldAccept2GenomePointers(t *C) {
-	g1, g2 := ga.NewGenome(ga.Bitset{}), ga.NewGenome(ga.Bitset{})
-	s.mater.Go(&g1, &g2)
+	g1, g2 := goga.NewGenome(goga.Bitset{}), goga.NewGenome(goga.Bitset{})
+	s.mater.Go(g1, g2)
 }
 
 func (s *MaterSuite) TestGoShouldReturn2NewGenomes(t *C) {
 
-	b1, b2 := ga.Bitset{}, ga.Bitset{}
+	b1, b2 := goga.Bitset{}, goga.Bitset{}
 	b1.Create(10)
 	b2.Create(10)
 	b1.SetAll(0)
 	b2.SetAll(1)
 
-	g1, g2 := ga.NewGenome(b1), ga.NewGenome(b2)
+	g1, g2 := goga.NewGenome(b1), goga.NewGenome(b2)
 	t.Assert(g1, Not(DeepEquals), g2)
 
-	c1, c2 := s.mater.Go(&g1, &g2)
+	c1, c2 := s.mater.Go(g1, g2)
 
-	var iGenome ga.IGenome
+	var iGenome goga.Genome
 	t.Assert(c1, Implements, &iGenome)
 	t.Assert(c2, Implements, &iGenome)
 
@@ -53,17 +52,17 @@ func (s *MaterSuite) TestGoShouldReturn2NewGenomes(t *C) {
 func (s *MaterSuite) TestShouldOnePointCrossover_DifferentBitset(t *C) {
 
 	for i := 0; i < 100; i++ {
-		b1, b2 := ga.Bitset{}, ga.Bitset{}
+		b1, b2 := goga.Bitset{}, goga.Bitset{}
 		genomeSize := 10
 		b1.Create(genomeSize)
 		b2.Create(genomeSize)
 		b1.SetAll(0)
 		b2.SetAll(1)
 
-		g1, g2 := ga.NewGenome(b1), ga.NewGenome(b2)
-		c1, c2 := ga.OnePointCrossover(&g1, &g2)
+		g1, g2 := goga.NewGenome(b1), goga.NewGenome(b2)
+		c1, c2 := goga.OnePointCrossover(g1, g2)
 
-		var iGenome ga.IGenome
+		var iGenome goga.Genome
 		t.Assert(c1, Implements, &iGenome)
 		t.Assert(c2, Implements, &iGenome)
 
@@ -91,17 +90,17 @@ func (s *MaterSuite) TestShouldOnePointCrossover_DifferentBitset(t *C) {
 func (s *MaterSuite) TestShouldTwoPointCrossOver_DifferentBitset(t *C) {
 
 	for i := 0; i < 100; i++ {
-		b1, b2 := ga.Bitset{}, ga.Bitset{}
+		b1, b2 := goga.Bitset{}, goga.Bitset{}
 		genomeSize := 10
 		b1.Create(genomeSize)
 		b2.Create(genomeSize)
 		b1.SetAll(0)
 		b2.SetAll(1)
 
-		g1, g2 := ga.NewGenome(b1), ga.NewGenome(b2)
-		c1, c2 := ga.TwoPointCrossover(&g1, &g2)
+		g1, g2 := goga.NewGenome(b1), goga.NewGenome(b2)
+		c1, c2 := goga.TwoPointCrossover(g1, g2)
 
-		var iGenome ga.IGenome
+		var iGenome goga.Genome
 		t.Assert(c1, Implements, &iGenome)
 		t.Assert(c2, Implements, &iGenome)
 
@@ -129,15 +128,15 @@ func (s *MaterSuite) TestShouldTwoPointCrossOver_DifferentBitset(t *C) {
 func (s *MaterSuite) TestShouldUniformCrossover(t *C) {
 
 	for i := 0; i < 10; i++ {
-		b1, b2 := ga.Bitset{}, ga.Bitset{}
+		b1, b2 := goga.Bitset{}, goga.Bitset{}
 		genomeSize := 1000
 		b1.Create(genomeSize)
 		b2.Create(genomeSize)
 		b1.SetAll(0)
 		b2.SetAll(1)
 
-		g1, g2 := ga.NewGenome(b1), ga.NewGenome(b2)
-		c1, c2 := ga.UniformCrossover(&g1, &g2)
+		g1, g2 := goga.NewGenome(b1), goga.NewGenome(b2)
+		c1, c2 := goga.UniformCrossover(g1, g2)
 
 		c1Bits, c2Bits := c1.GetBits(), c2.GetBits()
 		crossoverPoints := 0
@@ -162,7 +161,7 @@ func (s *MaterSuite) TestShouldUniformCrossover(t *C) {
 func (s *MaterSuite) TestShouldOnePointCrossover_DifferentSizedBitsets(t *C) {
 
 	for i := 0; i < 100; i++ {
-		b1, b2 := ga.Bitset{}, ga.Bitset{}
+		b1, b2 := goga.Bitset{}, goga.Bitset{}
 		genomeSize1 := 10
 		genomeSize2 := 5
 		b1.Create(genomeSize1)
@@ -170,8 +169,8 @@ func (s *MaterSuite) TestShouldOnePointCrossover_DifferentSizedBitsets(t *C) {
 		b1.SetAll(0)
 		b2.SetAll(1)
 
-		g1, g2 := ga.NewGenome(b1), ga.NewGenome(b2)
-		c1, c2 := ga.OnePointCrossover(&g1, &g2)
+		g1, g2 := goga.NewGenome(b1), goga.NewGenome(b2)
+		c1, c2 := goga.OnePointCrossover(g1, g2)
 
 		c1Bits, c2Bits := c1.GetBits(), c2.GetBits()
 		oneHasSize10 := (c1Bits.GetSize() == 10) || (c2Bits.GetSize() == 10)
@@ -181,7 +180,7 @@ func (s *MaterSuite) TestShouldOnePointCrossover_DifferentSizedBitsets(t *C) {
 	}
 
 	for i := 0; i < 100; i++ {
-		b1, b2 := ga.Bitset{}, ga.Bitset{}
+		b1, b2 := goga.Bitset{}, goga.Bitset{}
 		genomeSize1 := 5
 		genomeSize2 := 10
 		b1.Create(genomeSize1)
@@ -189,8 +188,8 @@ func (s *MaterSuite) TestShouldOnePointCrossover_DifferentSizedBitsets(t *C) {
 		b1.SetAll(0)
 		b2.SetAll(1)
 
-		g1, g2 := ga.NewGenome(b1), ga.NewGenome(b2)
-		c1, c2 := ga.OnePointCrossover(&g1, &g2)
+		g1, g2 := goga.NewGenome(b1), goga.NewGenome(b2)
+		c1, c2 := goga.OnePointCrossover(g1, g2)
 
 		c1Bits, c2Bits := c1.GetBits(), c2.GetBits()
 		oneHasSize10 := (c1Bits.GetSize() == 10) || (c2Bits.GetSize() == 10)
@@ -203,7 +202,7 @@ func (s *MaterSuite) TestShouldOnePointCrossover_DifferentSizedBitsets(t *C) {
 func (s *MaterSuite) TestShouldTwoPointCrossover_DifferentSizedBitsets(t *C) {
 
 	for i := 0; i < 100; i++ {
-		b1, b2 := ga.Bitset{}, ga.Bitset{}
+		b1, b2 := goga.Bitset{}, goga.Bitset{}
 		genomeSize1 := 10
 		genomeSize2 := 5
 		b1.Create(genomeSize1)
@@ -211,8 +210,8 @@ func (s *MaterSuite) TestShouldTwoPointCrossover_DifferentSizedBitsets(t *C) {
 		b1.SetAll(0)
 		b2.SetAll(1)
 
-		g1, g2 := ga.NewGenome(b1), ga.NewGenome(b2)
-		c1, c2 := ga.TwoPointCrossover(&g1, &g2)
+		g1, g2 := goga.NewGenome(b1), goga.NewGenome(b2)
+		c1, c2 := goga.TwoPointCrossover(g1, g2)
 
 		c1Bits, c2Bits := c1.GetBits(), c2.GetBits()
 
@@ -223,7 +222,7 @@ func (s *MaterSuite) TestShouldTwoPointCrossover_DifferentSizedBitsets(t *C) {
 	}
 
 	for i := 0; i < 100; i++ {
-		b1, b2 := ga.Bitset{}, ga.Bitset{}
+		b1, b2 := goga.Bitset{}, goga.Bitset{}
 		genomeSize1 := 5
 		genomeSize2 := 10
 		b1.Create(genomeSize1)
@@ -231,8 +230,8 @@ func (s *MaterSuite) TestShouldTwoPointCrossover_DifferentSizedBitsets(t *C) {
 		b1.SetAll(0)
 		b2.SetAll(1)
 
-		g1, g2 := ga.NewGenome(b1), ga.NewGenome(b2)
-		c1, c2 := ga.TwoPointCrossover(&g1, &g2)
+		g1, g2 := goga.NewGenome(b1), goga.NewGenome(b2)
+		c1, c2 := goga.TwoPointCrossover(g1, g2)
 
 		c1Bits, c2Bits := c1.GetBits(), c2.GetBits()
 
@@ -246,7 +245,7 @@ func (s *MaterSuite) TestShouldTwoPointCrossover_DifferentSizedBitsets(t *C) {
 func (s *MaterSuite) TestShouldUniformCrossover_DifferentSizedBitsets(t *C) {
 
 	for i := 0; i < 10; i++ {
-		b1, b2 := ga.Bitset{}, ga.Bitset{}
+		b1, b2 := goga.Bitset{}, goga.Bitset{}
 		genomeSize1 := 20
 		genomeSize2 := 10
 		b1.Create(genomeSize1)
@@ -254,8 +253,8 @@ func (s *MaterSuite) TestShouldUniformCrossover_DifferentSizedBitsets(t *C) {
 		b1.SetAll(0)
 		b2.SetAll(1)
 
-		g1, g2 := ga.NewGenome(b1), ga.NewGenome(b2)
-		c1, c2 := ga.UniformCrossover(&g1, &g2)
+		g1, g2 := goga.NewGenome(b1), goga.NewGenome(b2)
+		c1, c2 := goga.UniformCrossover(g1, g2)
 
 		c1Bits, c2Bits := c1.GetBits(), c2.GetBits()
 		oneSizedGenomeSize1 := (c1Bits.GetSize() == genomeSize1) || (c2Bits.GetSize() == genomeSize1)
@@ -265,7 +264,7 @@ func (s *MaterSuite) TestShouldUniformCrossover_DifferentSizedBitsets(t *C) {
 	}
 
 	for i := 0; i < 10; i++ {
-		b1, b2 := ga.Bitset{}, ga.Bitset{}
+		b1, b2 := goga.Bitset{}, goga.Bitset{}
 		genomeSize1 := 10
 		genomeSize2 := 20
 		b1.Create(genomeSize1)
@@ -273,8 +272,8 @@ func (s *MaterSuite) TestShouldUniformCrossover_DifferentSizedBitsets(t *C) {
 		b1.SetAll(0)
 		b2.SetAll(1)
 
-		g1, g2 := ga.NewGenome(b1), ga.NewGenome(b2)
-		c1, c2 := ga.UniformCrossover(&g1, &g2)
+		g1, g2 := goga.NewGenome(b1), goga.NewGenome(b2)
+		c1, c2 := goga.UniformCrossover(g1, g2)
 
 		c1Bits, c2Bits := c1.GetBits(), c2.GetBits()
 		oneSizedGenomeSize1 := (c1Bits.GetSize() == genomeSize1) || (c2Bits.GetSize() == genomeSize1)
@@ -287,24 +286,24 @@ func (s *MaterSuite) TestShouldUniformCrossover_DifferentSizedBitsets(t *C) {
 func (s *MaterSuite) TestShouldConfig_Single(t *C) {
 
 	numCalls := 0
-	myFunc := func(a, b *ga.IGenome) (ga.IGenome, ga.IGenome) {
+	myFunc := func(a, b goga.Genome) (goga.Genome, goga.Genome) {
 		numCalls++
-		return *a, *b
+		return a, b
 	}
 
-	m := ga.NewMater(
-		[]ga.MaterFunctionProbability{
+	m := goga.NewMater(
+		[]goga.MaterFunctionProbability{
 			{P: 1.0, F: myFunc},
 		},
 	)
 
 	numIterations := 100
-	b1, b2 := ga.Bitset{}, ga.Bitset{}
+	b1, b2 := goga.Bitset{}, goga.Bitset{}
 	b1.Create(10)
 	b2.Create(10)
 	for i := 0; i < numIterations; i++ {
-		g1, g2 := ga.NewGenome(b1), ga.NewGenome(b2)
-		m.Go(&g1, &g2)
+		g1, g2 := goga.NewGenome(b1), goga.NewGenome(b2)
+		m.Go(g1, g2)
 	}
 
 	t.Assert(numCalls, Equals, numIterations)
@@ -315,29 +314,29 @@ func (s *MaterSuite) TestShouldConfig_Multiple(t *C) {
 	for i := 0; i < 100; i++ {
 		numCalls1 := 0
 		numCalls2 := 0
-		myFunc1 := func(a, b *ga.IGenome) (ga.IGenome, ga.IGenome) {
+		myFunc1 := func(a, b goga.Genome) (goga.Genome, goga.Genome) {
 			numCalls1++
-			return *a, *b
+			return a, b
 		}
-		myFunc2 := func(a, b *ga.IGenome) (ga.IGenome, ga.IGenome) {
+		myFunc2 := func(a, b goga.Genome) (goga.Genome, goga.Genome) {
 			numCalls2++
-			return *a, *b
+			return a, b
 		}
 
-		m := ga.NewMater(
-			[]ga.MaterFunctionProbability{
+		m := goga.NewMater(
+			[]goga.MaterFunctionProbability{
 				{P: 0.5, F: myFunc1},
 				{P: 0.5, F: myFunc2},
 			},
 		)
 
 		numIterations := 1000
-		b1, b2 := ga.Bitset{}, ga.Bitset{}
+		b1, b2 := goga.Bitset{}, goga.Bitset{}
 		b1.Create(10)
 		b2.Create(10)
 		for i := 0; i < numIterations; i++ {
-			g1, g2 := ga.NewGenome(b1), ga.NewGenome(b2)
-			m.Go(&g1, &g2)
+			g1, g2 := goga.NewGenome(b1), goga.NewGenome(b2)
+			m.Go(g1, g2)
 		}
 
 		sixtyPercent := (numIterations / 100) * 60
@@ -353,14 +352,14 @@ func (s *MaterSuite) TestShouldMutate(t *C) {
 
 	genomeSize := 10
 	for i := 0; i < 100; i++ {
-		b1 := ga.Bitset{}
+		b1 := goga.Bitset{}
 		b1.Create(genomeSize)
 		b1.SetAll(0)
 
-		g1, g2 := ga.NewGenome(b1), ga.NewGenome(b1)
-		c1, c2 := ga.Mutate(&g1, &g2)
+		g1, g2 := goga.NewGenome(b1), goga.NewGenome(b1)
+		c1, c2 := goga.Mutate(g1, g2)
 
-		var iGenome ga.IGenome
+		var iGenome goga.Genome
 		t.Assert(c1, Implements, &iGenome)
 		t.Assert(c2, Implements, &iGenome)
 
@@ -384,20 +383,20 @@ func (s *MaterSuite) TestShouldMutate(t *C) {
 
 func (s *MaterSuite) TestShouldUseEliteFromConfigSettings(t *C) {
 
-	elite := ga.NewGenome(ga.Bitset{})
-	myFunc := func(a, b *ga.IGenome) (ga.IGenome, ga.IGenome) {
-		t.Assert(b, Equals, &elite)
-		return *a, *b
+	elite := goga.NewGenome(goga.Bitset{})
+	myFunc := func(a, b goga.Genome) (goga.Genome, goga.Genome) {
+		t.Assert(b, Equals, elite)
+		return a, b
 	}
 
-	m := ga.NewMater(
-		[]ga.MaterFunctionProbability{
+	m := goga.NewMater(
+		[]goga.MaterFunctionProbability{
 			{P: 1.0, F: myFunc, UseElite: true},
 		},
 	)
 
-	m.OnElite(&elite)
+	m.OnElite(elite)
 
-	g1, g2 := ga.NewGenome(ga.Bitset{}), ga.NewGenome(ga.Bitset{})
-	m.Go(&g1, &g2)
+	g1, g2 := goga.NewGenome(goga.Bitset{}), goga.NewGenome(goga.Bitset{})
+	m.Go(g1, g2)
 }

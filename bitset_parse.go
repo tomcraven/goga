@@ -1,8 +1,8 @@
-package ga
+package goga
 
-// IBitsetParse - an interface to an object that is able
+// BitsetParse - an interface to an object that is able
 // to parse a bitset into an array of uint64s
-type IBitsetParse interface {
+type BitsetParse interface {
 	SetFormat([]int)
 	Process(*Bitset) []uint64
 }
@@ -13,7 +13,7 @@ type bitsetParse struct {
 }
 
 // CreateBitsetParse returns an instance of a bitset parser
-func CreateBitsetParse() IBitsetParse {
+func CreateBitsetParse() BitsetParse {
 	return &bitsetParse{}
 }
 

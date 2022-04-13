@@ -1,11 +1,11 @@
-package ga
+package goga
 
-// ISimulator - a Simulator interface
-type ISimulator interface {
+// Simulator - a Simulator interface
+type Simulator interface {
 	OnBeginSimulation()
-	Simulate(*IGenome)
+	Simulate(Genome)
 	OnEndSimulation()
-	ExitFunc(*IGenome) bool
+	ExitFunc(Genome) bool
 }
 
 // NullSimulator - a null implementation of the Simulator interface
@@ -13,7 +13,7 @@ type NullSimulator struct {
 }
 
 // Simulate - a null implementation of Simulator's 'Simulate'
-func (ns *NullSimulator) Simulate(*IGenome) {
+func (ns *NullSimulator) Simulate(Genome) {
 }
 
 // OnBeginSimulation - a null implementation of Simulator's 'OnBeginSimulation'
@@ -25,6 +25,6 @@ func (ns *NullSimulator) OnEndSimulation() {
 }
 
 // ExitFunc - a null implementation of Simulator's 'ExitFunc'
-func (ns *NullSimulator) ExitFunc(*IGenome) bool {
+func (ns *NullSimulator) ExitFunc(Genome) bool {
 	return false
 }

@@ -1,17 +1,18 @@
-package ga_test
+package goga_test
 
 import (
+	"math/rand"
+
 	"github.com/tomcraven/goga"
 	. "gopkg.in/check.v1"
-	"math/rand"
 )
 
 type BitsetParseSuite struct {
-	bp ga.IBitsetParse
+	bp goga.BitsetParse
 }
 
 func (s *BitsetParseSuite) SetUpTest(t *C) {
-	s.bp = ga.CreateBitsetParse()
+	s.bp = goga.CreateBitsetParse()
 }
 func (s *BitsetParseSuite) TearDownTest(t *C) {
 	s.bp = nil
@@ -33,7 +34,7 @@ func (s *BitsetParseSuite) TestShouldPanicWithMismatchedFormatAndBitsetSize(t *C
 	}
 	s.bp.SetFormat(inputFormat)
 
-	inputBitset := ga.Bitset{}
+	inputBitset := goga.Bitset{}
 	inputBitset.Create(1) // Size should equal sum of all formats
 
 	t.Assert(func() { s.bp.Process(&inputBitset) }, Panics, "Input format does not match bitset size")
@@ -55,7 +56,7 @@ func (s *BitsetParseSuite) TestShouldNotPanicWithCorrectFormatAndBitsetSize(t *C
 		bitsetSize += i
 	}
 
-	inputBitset := ga.Bitset{}
+	inputBitset := goga.Bitset{}
 	inputBitset.Create(bitsetSize) // Size should equal sum of all formats
 
 	s.bp.Process(&inputBitset)
@@ -68,7 +69,7 @@ func (s *BitsetParseSuite) TestShouldProcessSingleFormat(t *C) {
 
 	s.bp.SetFormat(inputFormat)
 
-	inputBitset := ga.Bitset{}
+	inputBitset := goga.Bitset{}
 	inputBitset.Create(16)
 	for i := 0; i < 16; i++ {
 		inputBitset.Set(i, 1)
@@ -88,7 +89,7 @@ func (s *BitsetParseSuite) TestShouldProcessMultipleFormat(t *C) {
 
 	s.bp.SetFormat(inputFormat)
 
-	inputBitset := ga.Bitset{}
+	inputBitset := goga.Bitset{}
 	inputBitset.Create(16)
 	for i := 0; i < 8; i++ {
 		inputBitset.Set(i, 1)

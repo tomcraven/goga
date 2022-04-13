@@ -1,17 +1,16 @@
-package ga_test
+package goga_test
 
 import (
-	. "gopkg.in/check.v1"
-
 	"github.com/tomcraven/goga"
+	. "gopkg.in/check.v1"
 )
 
 type GenomeSuite struct {
-	genome ga.IGenome
+	genome goga.Genome
 }
 
 func (s *GenomeSuite) SetUpTest(t *C) {
-	s.genome = ga.NewGenome(ga.Bitset{})
+	s.genome = goga.NewGenome(goga.Bitset{})
 }
 func (s *GenomeSuite) TearDownTest(t *C) {
 	s.genome = nil
@@ -31,11 +30,11 @@ func (s *GenomeSuite) TestShouldSetGetFitness(t *C) {
 }
 
 func (s *GenomeSuite) TestShouldGetBits(t *C) {
-	b := ga.Bitset{}
+	b := goga.Bitset{}
 	b.Create(10)
 	b.Set(1, 1)
 	b.Set(9, 1)
 
-	g := ga.NewGenome(b)
+	g := goga.NewGenome(b)
 	t.Assert(&b, DeepEquals, g.GetBits())
 }

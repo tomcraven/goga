@@ -7,7 +7,7 @@ import (
 	"runtime"
 	"time"
 
-	ga "github.com/tomcraven/goga"
+	"github.com/tomcraven/goga"
 )
 
 type stringMaterSimulator struct {
@@ -17,29 +17,29 @@ func (sms *stringMaterSimulator) OnBeginSimulation() {
 }
 func (sms *stringMaterSimulator) OnEndSimulation() {
 }
-func (sms *stringMaterSimulator) Simulate(g *ga.IGenome) {
-	bits := (*g).GetBits()
+func (sms *stringMaterSimulator) Simulate(g goga.Genome) {
+	bits := g.GetBits()
 	for i, character := range targetString {
 		for j := 0; j < 8; j++ {
 			targetBit := character & (1 << uint(j))
 			bit := bits.Get((i * 8) + j)
 			if targetBit != 0 && bit == 1 {
-				(*g).SetFitness((*g).GetFitness() + 1)
+				g.SetFitness(g.GetFitness() + 1)
 			} else if targetBit == 0 && bit == 0 {
-				(*g).SetFitness((*g).GetFitness() + 1)
+				g.SetFitness(g.GetFitness() + 1)
 			}
 		}
 	}
 }
-func (sms *stringMaterSimulator) ExitFunc(g *ga.IGenome) bool {
-	return (*g).GetFitness() == targetLength
+func (sms *stringMaterSimulator) ExitFunc(g goga.Genome) bool {
+	return g.GetFitness() == targetLength
 }
 
 type myBitsetCreate struct {
 }
 
-func (bc *myBitsetCreate) Go() ga.Bitset {
-	b := ga.Bitset{}
+func (bc *myBitsetCreate) Go() goga.Bitset {
+	b := goga.Bitset{}
 	b.Create(targetLength)
 	for i := 0; i < targetLength; i++ {
 		b.Set(i, rand.Intn(2))
@@ -51,8 +51,8 @@ type myEliteConsumer struct {
 	currentIter int
 }
 
-func (ec *myEliteConsumer) OnElite(g *ga.IGenome) {
-	gBits := (*g).GetBits()
+func (ec *myEliteConsumer) OnElite(g goga.Genome) {
+	gBits := g.GetBits()
 	ec.currentIter++
 	var genomeString string
 	for i := 0; i < gBits.GetSize(); i += 8 {
@@ -66,7 +66,7 @@ func (ec *myEliteConsumer) OnElite(g *ga.IGenome) {
 		genomeString += string(c)
 	}
 
-	fmt.Println(ec.currentIter, "\t", genomeString, "\t", (*g).GetFitness())
+	fmt.Println(ec.currentIter, "\t", genomeString, "\t", g.GetFitness())
 }
 
 const (
@@ -90,21 +90,21 @@ func main() {
 	numThreads := 4
 	runtime.GOMAXPROCS(numThreads)
 
-	genAlgo := ga.NewGeneticAlgorithm()
+	genAlgo := goga.NewGeneticAlgorithm()
 
 	genAlgo.Simulator = &stringMaterSimulator{}
 	genAlgo.BitsetCreate = &myBitsetCreate{}
 	genAlgo.EliteConsumer = &myEliteConsumer{}
-	genAlgo.Mater = ga.NewMater(
-		[]ga.MaterFunctionProbability{
-			{P: 1.0, F: ga.TwoPointCrossover},
-			{P: 1.0, F: ga.Mutate},
-			{P: 1.0, F: ga.UniformCrossover, UseElite: true},
+	genAlgo.Mater = goga.NewMater(
+		[]goga.MaterFunctionProbability{
+			{P: 1.0, F: goga.TwoPointCrossover},
+			{P: 1.0, F: goga.Mutate},
+			{P: 1.0, F: goga.UniformCrossover, UseElite: true},
 		},
 	)
-	genAlgo.Selector = ga.NewSelector(
-		[]ga.SelectorFunctionProbability{
-			{P: 1.0, F: ga.Roulette},
+	genAlgo.Selector = goga.NewSelector(
+		[]goga.SelectorFunctionProbability{
+			{P: 1.0, F: goga.Roulette},
 		},
 	)
 
